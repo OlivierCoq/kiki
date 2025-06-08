@@ -1,5 +1,5 @@
+
 'use client'
-import { SessionProvider } from 'next-auth/react'
 import { useEffect } from 'react'
 import { ToastContainer } from 'react-toastify'
 import { DEFAULT_PAGE_TITLE } from '@/context/constants'
@@ -13,7 +13,7 @@ import { TitleProvider } from '@/context/useTitleContext'
 
 const AppProvidersWrapper = ({ children }: ChildrenType) => {
   const handleChangeTitle = () => {
-    if (document.visibilityState == 'hidden') document.title = 'Please come back 🥺'
+    if (document.visibilityState == 'hidden') document.title = 'Get back to cooking!'
     else document.title = DEFAULT_PAGE_TITLE
   }
 
@@ -35,7 +35,6 @@ const AppProvidersWrapper = ({ children }: ChildrenType) => {
   }, [])
 
   return (
-    <SessionProvider>
       <LayoutProvider>
         <TitleProvider>
           <NotificationProvider>
@@ -44,7 +43,6 @@ const AppProvidersWrapper = ({ children }: ChildrenType) => {
           </NotificationProvider>
         </TitleProvider>
       </LayoutProvider>
-    </SessionProvider>
   )
 }
 export default AppProvidersWrapper

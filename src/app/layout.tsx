@@ -7,6 +7,8 @@ import NextTopLoader from 'nextjs-toploader'
 import '@/assets/scss/app.scss'
 import { DEFAULT_PAGE_TITLE } from '@/context/constants'
 
+
+
 const play = Play({
   subsets: ['latin'],
   weight: ['400', '700'],

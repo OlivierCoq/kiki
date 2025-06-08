@@ -8,7 +8,7 @@ interface TitleContextType {
 const TitleContext = createContext<TitleContextType | undefined>(undefined)
 
 export const TitleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [title, setTitle] = useState<string>('WELCOME!')
+  const [title, setTitle] = useState<string>( `Let's get cooking!`)
 
   return <TitleContext.Provider value={{ title, setTitle }}>{children}</TitleContext.Provider>
 }

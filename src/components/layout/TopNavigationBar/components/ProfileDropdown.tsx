@@ -1,10 +1,33 @@
+
+'use client'
+
 import avatar1 from '@/assets/images/users/avatar-1.jpg'
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Dropdown, DropdownHeader, DropdownItem, DropdownMenu, DropdownToggle } from 'react-bootstrap'
+import { useState } from 'react'
+
+
+import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+
+import { createClient } from '@/utils/supabase/client'
 
 const ProfileDropdown = () => {
+
+  const handleLogout = async () => {
+    const supabase = await createClient() 
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      console.error('Logout error:', error)
+      redirect('/error')
+    }
+    revalidatePath('/', 'layout')
+    redirect('/login')
+  }
+
+
   return (
     <Dropdown className="topbar-item">
       <DropdownToggle
@@ -16,7 +39,7 @@ const ProfileDropdown = () => {
         aria-haspopup="true"
         aria-expanded="false">
         <span className="d-flex align-items-center">
-          <Image className="rounded-circle" width={32} src={avatar1} alt="avatar-3" />
+          <img className="rounded-circle d-none d-sm-inline-block" width={32} height={32} src="https://ybkqtujfzpfkfvgsdpmg.supabase.co/storage/v1/object/public/img//KIKI.png" alt="avatar-3" />
         </span>
       </DropdownToggle>
       <DropdownMenu className="dropdown-menu-end">
@@ -44,7 +67,7 @@ const ProfileDropdown = () => {
           <span className="align-middle">Lock screen</span>
         </DropdownItem>
         <div className="dropdown-divider my-1" />
-        <DropdownItem as={Link} className=" text-danger" href="/auth/sign-in">
+        <DropdownItem onClick={handleLogout} className=" text-danger" href="/login">
           <IconifyIcon icon="bx:log-out" className="fs-18 align-middle me-1" />
           <span className="align-middle">Logout</span>
         </DropdownItem>

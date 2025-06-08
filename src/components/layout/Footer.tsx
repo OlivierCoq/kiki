@@ -7,9 +7,9 @@ const Footer = () => {
       <Container fluid>
         <Row>
           <Col xs={12} className="text-center">
-            © Larkon. Crafted by <IconifyIcon icon="iconamoon:heart-duotone" className="fs-18 align-middle text-danger" />{' '}
+            © Kiki. Built with <IconifyIcon icon="iconamoon:heart-duotone" className="fs-18 align-middle text-danger" />{' '} by {' '} 
             <a className="fw-bold footer-text" target="_blank">
-              Techzaa
+              Wekiva Web Solutions
             </a>
           </Col>
         </Row>
