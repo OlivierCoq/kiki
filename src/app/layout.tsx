@@ -1,8 +1,8 @@
-import logoDark from '@/assets/images/logo-dark.png'
+// import logoDark from '@/assets/images/logo-dark.png'
 import AppProvidersWrapper from '@/components/wrappers/AppProvidersWrapper'
 import type { Metadata } from 'next'
 import { Play } from 'next/font/google'
-import Image from 'next/image'
+// import Image from 'next/image'
 import NextTopLoader from 'nextjs-toploader'
 import '@/assets/scss/app.scss'
 import { DEFAULT_PAGE_TITLE } from '@/context/constants'
@@ -15,10 +15,10 @@ const play = Play({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Larkon Nextjs - Responsive Admin Dashboard Template',
+    template: '%s | Kiki - Premium Catering Software',
     default: DEFAULT_PAGE_TITLE,
   },
-  description: 'Bootstrap 5 based  Responsive Admin Dashboard Template',
+  description: 'Kiki is a premium catering software designed to streamline your catering business operations.',
 }
 
 const splashScreenStyles = `
@@ -63,9 +63,9 @@ export default function RootLayout({
         <style suppressHydrationWarning>{splashScreenStyles}</style>
       </head>
       <body className={play.className}>
-        <div id="splash-screen">
+        {/* <div id="splash-screen">
           <Image alt="Logo" width={112} height={24} src={logoDark} style={{ height: '7%', width: 'auto' }} priority />
-        </div>
+        </div> */}
         <NextTopLoader color="#ff6c2f" showSpinner={false} />
         <div id="__next_splash">
           <AppProvidersWrapper>{children}</AppProvidersWrapper>
