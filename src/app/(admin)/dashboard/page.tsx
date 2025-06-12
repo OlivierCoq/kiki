@@ -10,9 +10,7 @@ const DashboardPage = () => {
   return (
     <>
       <Row>
-        <Stats />
-        <Conversions />
-        <Orders />
+
       </Row>
     </>
   )

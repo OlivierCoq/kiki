@@ -28,10 +28,19 @@ export async function login(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   console.log('User data:', user)
 
-
-  // cookies().set('user', JSON.stringify(user))
-  // cookies().set('email', email)
-
+  // Test updating user metadata
+  const { error: updateError } = await supabase.auth.updateUser({
+    data: {
+      full_name: 'Olivier Coq',
+      avatar_url: 'https://ybkqtujfzpfkfvgsdpmg.supabase.co/storage/v1/object/public/img//example_pfp.jpg',
+    },
+  })
+  if (updateError) {
+    console.error('Update user error:', updateError)
+    redirect('/error')
+  }
+  console.log('User metadata updated successfully')
+  // console.log('User metadata:', user?.user_metadata)
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')

@@ -20,6 +20,12 @@ const ProfileDropdown = () => {
   // Supabase user
   const { session, loading } = useUser();
   const user = session?.user || null;
+  console.log('ProfileDropdown user:', user)
+  
+  const profile_pic = user?.user_metadata?.avatar_url || 'https://ybkqtujfzpfkfvgsdpmg.supabase.co/storage/v1/object/public/img//KIKI.png'
+  
+  
+    // Actions and handlers
   const handleLogout = async () => {
     const supabase = await createClient() 
     const { error } = await supabase.auth.signOut()
@@ -31,7 +37,7 @@ const ProfileDropdown = () => {
     redirect('/login')
   }
 
-  console.log('ProfileDropdown session:', session)
+  // console.log('ProfileDropdown session:', session)
 
   return (
     <Dropdown className="topbar-item">
@@ -44,12 +50,12 @@ const ProfileDropdown = () => {
         aria-haspopup="true"
         aria-expanded="false">
         <span className="d-flex align-items-center">
-          <img className="rounded-circle d-none d-sm-inline-block" width={32} height={32} src="https://ybkqtujfzpfkfvgsdpmg.supabase.co/storage/v1/object/public/img//KIKI.png" alt="avatar-3" />
+          <img className="rounded-circle d-none d-sm-inline-block" width={32} height={32} src={profile_pic} alt="avatar-3" />
         </span>
       </DropdownToggle>
       <DropdownMenu className="dropdown-menu-end">
         <DropdownHeader as={'h6'} className="dropdown-header">
-          Logged in: { session?.user?.email }
+          Logged in: { user?.user_metadata?.full_name || user?.email || 'Guest' }
         </DropdownHeader>
         <DropdownItem as={Link} href="/profile">
           <IconifyIcon icon="bx:user-circle" className="text-muted fs-18 align-middle me-1" />
