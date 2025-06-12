@@ -6,8 +6,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 
 
-// Redux
-import { cookies } from 'next/headers'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -26,15 +24,13 @@ export async function login(formData: FormData) {
     redirect('/error')
   }
 
-  // Redux
-  const email = formData.get('email') as string
   // Get user from supabase:
   const { data: { user } } = await supabase.auth.getUser()
   console.log('User data:', user)
 
 
-  cookies().set('user', JSON.stringify(user))
-  cookies().set('email', email)
+  // cookies().set('user', JSON.stringify(user))
+  // cookies().set('email', email)
 
 
   revalidatePath('/', 'layout')

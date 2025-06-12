@@ -7,7 +7,7 @@ import NextTopLoader from 'nextjs-toploader'
 import '@/assets/scss/app.scss'
 import { DEFAULT_PAGE_TITLE } from '@/context/constants'
 
-
+import { UserProvider } from '@/context/useUserContext'
 
 const play = Play({
   subsets: ['latin'],
@@ -70,7 +70,11 @@ export default function RootLayout({
         </div> */}
         <NextTopLoader color="#ff6c2f" showSpinner={false} />
         <div id="__next_splash">
-          <AppProvidersWrapper>{children}</AppProvidersWrapper>
+          <UserProvider> 
+            <AppProvidersWrapper>
+              {children}
+            </AppProvidersWrapper>
+          </UserProvider>
         </div>
       </body>
     </html>

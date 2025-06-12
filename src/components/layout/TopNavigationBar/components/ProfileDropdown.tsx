@@ -13,9 +13,13 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/client'
+import { useUser } from '@/context/useUserContext'
 
 const ProfileDropdown = () => {
 
+  // Supabase user
+  const { session, loading } = useUser();
+  const user = session?.user || null;
   const handleLogout = async () => {
     const supabase = await createClient() 
     const { error } = await supabase.auth.signOut()
@@ -27,6 +31,7 @@ const ProfileDropdown = () => {
     redirect('/login')
   }
 
+  console.log('ProfileDropdown session:', session)
 
   return (
     <Dropdown className="topbar-item">
@@ -44,7 +49,7 @@ const ProfileDropdown = () => {
       </DropdownToggle>
       <DropdownMenu className="dropdown-menu-end">
         <DropdownHeader as={'h6'} className="dropdown-header">
-          Welcome Gaston!
+          Logged in: { session?.user?.email }
         </DropdownHeader>
         <DropdownItem as={Link} href="/profile">
           <IconifyIcon icon="bx:user-circle" className="text-muted fs-18 align-middle me-1" />
