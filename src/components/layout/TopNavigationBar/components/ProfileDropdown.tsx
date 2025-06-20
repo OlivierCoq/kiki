@@ -22,7 +22,7 @@ const ProfileDropdown = () => {
   const user = session?.user || null;
   console.log('ProfileDropdown user:', user)
   
-  const profile_pic = user?.user_metadata?.avatar_url || 'https://ybkqtujfzpfkfvgsdpmg.supabase.co/storage/v1/object/public/img//KIKI.png'
+  const profile_pic = user?.user_metadata?.avatar_url || 'https://ybkqtujfzpfkfvgsdpmg.supabase.co/storage/v1/object/public/img//default_pfp.jpg'
   
   
     // Actions and handlers

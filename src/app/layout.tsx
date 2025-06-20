@@ -2,10 +2,13 @@
 import AppProvidersWrapper from '@/components/wrappers/AppProvidersWrapper'
 import type { Metadata } from 'next'
 import { Play } from 'next/font/google'
-// import Image from 'next/image'
+import Image from 'next/image'
 import NextTopLoader from 'nextjs-toploader'
 import '@/assets/scss/app.scss'
 import { DEFAULT_PAGE_TITLE } from '@/context/constants'
+
+import logoDark from '@/assets/images/kiki_logo_dark.png'
+import logoLight from '@/assets/images/kiki_logo_light.png'
 
 import { UserProvider } from '@/context/useUserContext'
 
@@ -65,9 +68,9 @@ export default function RootLayout({
         <style suppressHydrationWarning>{splashScreenStyles}</style>
       </head>
       <body className={play.className}>
-        {/* <div id="splash-screen">
+        <div id="splash-screen">
           <Image alt="Logo" width={112} height={24} src={logoDark} style={{ height: '7%', width: 'auto' }} priority />
-        </div> */}
+        </div>
         <NextTopLoader color="#ff6c2f" showSpinner={false} />
         <div id="__next_splash">
           <UserProvider> 

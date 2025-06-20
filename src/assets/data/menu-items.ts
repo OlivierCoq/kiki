@@ -12,4 +12,16 @@ export const MENU_ITEMS: MenuItemType[] = [
     icon: 'solar:widget-5-bold-duotone',
     url: '/dashboard',
   },
+  {
+    key: 'events',
+    label: 'Events',
+    icon: 'solar:calendar-bold-duotone',
+    url: '/events',
+  },
+  {
+    key: 'inventory',
+    label: 'Inventory',
+    icon: 'solar:box-bold-duotone',
+    url: '/inventory/warehouse',
+  }
 ]
