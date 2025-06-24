@@ -16,7 +16,20 @@ export const MENU_ITEMS: MenuItemType[] = [
     key: 'events',
     label: 'Events',
     icon: 'solar:calendar-bold-duotone',
-    url: '/events',
+    children: [
+      {
+        key: 'event-list',
+        label: 'Active',
+        url: '/events/active',
+        parentKey: 'events',
+      },
+      {
+        key: 'archived-events',
+        label: 'Archived',
+        url: '/events/archived',
+        parentKey: 'events',
+      }
+    ]
   },
   {
     key: 'inventory',

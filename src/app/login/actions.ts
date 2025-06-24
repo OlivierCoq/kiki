@@ -83,55 +83,74 @@ export async function signup(formData: FormData) {
     }
   }
 
-  const { error } = await supabase.auth.signUp(supabaseData)
+  const {  error } = await supabase.auth.signUp(supabaseData)
+  console.log('Supabase signup error:', error)
 
-  // Get user from supabase:
-  const { data: { user } } = await supabase.auth.getUser()
-  console.log('Newly created User data:', user)
-
-  console.log('Form data:', formData)
-
-
-  // create a new Square customer 
-  // https://developer.squareup.com/explorer/square/customers-api/create-customer
-  await squareClient?.customers.create({
-    idempotencyKey: randomUUID(), // Use a unique idempotency key for each request
-    givenName: user?.user_metadata?.full_name || 'New User',
-    emailAddress: user?.email || '',
-    referenceId: user?.id || '', // Store Supabase user ID in Square customer referenceId 
-    address: {
-      postalCode: formData.get('postalCode') as string || '',
-      locality: formData.get('locality') as string || '',
-      administrativeDistrictLevel1: formData.get('administrativeDistrictLevel1') as string || '',
-      addressLine1: formData.get('addressLine1') as string || '',
-      addressLine2: formData.get('addressLine2') as string || '',
-      firstName: formData.get('firstName') as string || '',
-      lastName: formData.get('lastName') as string || '',
-      company: formData.get('company') as string || '',
-      country: formData.get('country') as string || '',
-    }
-  }).then((response) => {
+  if (error) {
+    console.error('Signup error:', error)
+    redirect('/error')
+  } else {
+    console.log('Form data:', formData)
     
-    console.log('Square customer created:', response)
-  })
-  // Update Supabase user metadata
-  // const { error: updateError } = await supabase.auth.updateUser({
-  //   data: {
+
+    // create a new Square customer 
+    // https://developer.squareup.com/explorer/square/customers-api/create-customer
+    await squareClient?.customers.create({
+      idempotencyKey: randomUUID(), // Use a unique idempotency key for each request
+      givenName: squareData?.givenName || 'New User',
+      emailAddress: squareData?.emailAddress || '',
+      referenceId: '', // Store Supabase user ID in Square customer referenceId 
+      address: {
+        postalCode: formData.get('postalCode') as string || '',
+        locality: formData.get('locality') as string || '',
+        administrativeDistrictLevel1: formData.get('administrativeDistrictLevel1') as string || '',
+        addressLine1: formData.get('addressLine1') as string || '',
+        addressLine2: formData.get('addressLine2') as string || '',
+        firstName: formData.get('firstName') as string || '',
+        lastName: formData.get('lastName') as string || '',
+        company: formData.get('company') as string || '',
+        country: formData.get('country') as string || '',
+      }
+    }).then(async(response) => {
       
-  //   },
-  // })
-  // if (updateError) {
-  //   console.error('Update user error:', updateError)
-  //   redirect('/error')
-  // }
+      console.log('Square customer created:', response)
+
+      const { error } = await supabase.auth.signInWithPassword(supabaseData)
+
+      if (error) {
+        console.error('Login error:', error)
+        redirect('/error')
+      }
+    
+      // Get user from supabase:
+      const { data: { user } } = await supabase.auth.getUser()
+      console.log('User data:', user)
   
+    
+      revalidatePath('/', 'layout')
+      redirect('/customers/dashboard')
+    })
+    // Update Supabase user metadata
+    // const { error: updateError } = await supabase.auth.updateUser({
+    //   data: {
+        
+    //   },
+    // })
+    // if (updateError) {
+    //   console.error('Update user error:', updateError)
+    //   redirect('/error')
+    // }
+    
+  
+   
+  
+  
+  
+      revalidatePath('/', 'layout')
+      redirect('/customers/dashboard')
+  }
 
- 
-
-
-
-    revalidatePath('/', 'layout')
-    redirect('/customers/dashboard')
+  
   }
 
 
