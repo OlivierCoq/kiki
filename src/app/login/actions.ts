@@ -109,6 +109,7 @@ export async function signup(formData: FormData) {
         firstName: formData.get('firstName') as string || '',
         lastName: formData.get('lastName') as string || '',
         company: formData.get('company') as string || '',
+        phoneNumber: formData.get('phoneNumber') as string || '',
         country: formData.get('country') as string || '',
       }
     }).then(async(response) => {
