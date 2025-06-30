@@ -4,21 +4,27 @@ import useToggle from '@/hooks/useToggle'
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
 import { 
   Col, 
-  Row } from 'react-bootstrap'
+  Row 
+} from 'react-bootstrap'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 
 //Events
+import { useEvents } from '@/context/useEventsContext'
 import EventsCard from './components/EventsCard'
+import { Event } from '@/types/event'
+
+// Venues
 
 const ActiveEventsPage = () => {
 
 
 // pull events from the database:
 // const supabase = await createClient()
-  const [events, setEvents] = useState<any[]>([])
+  // const [events, setEvents] = useState<any[]>([])
+  const { events, fetchEvents } = useEvents()
   const [loading, setLoading] = useState(true)
   const [mainEvent, setMainEvent] = useState<any>(null)
 
@@ -26,15 +32,14 @@ const ActiveEventsPage = () => {
   const { isTrue, toggle } = useToggle()
 
   useEffect(() => {
-    fetch('/api/events')
-      .then(res => res.json())
-      .then(async(data) => {
-        await setEvents(data || [])
-        setLoading(false)
-      })
+    if (!events) {
+      fetchEvents()
+      setLoading(false)
+    } else { setLoading(false) }
   }, [])
 
-  console.log('Events:', events)
+  // console.log('Events:', events)
+
 
 
   return (
@@ -49,8 +54,8 @@ const ActiveEventsPage = () => {
       </Col>
       <Col md={12}>
 
-          {(events.length > 0) && !loading ? (
-            events.map((event) => event.active && ( <EventsCard key={event.id} event={event} /> ))
+          {(events?.length > 0) && !loading ? (
+            events?.map((event: Event) => event.active && ( <EventsCard key={event.id} event={event} /> ))
           ) : (
             <Col>
               <p>{ loading ? 'Loading ...' : 'No active events found.' }</p>

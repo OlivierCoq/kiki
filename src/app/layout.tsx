@@ -18,6 +18,10 @@ const play = Play({
   display: 'swap',
 })
 
+// Context
+import { EventsProvider } from '@/context/useEventsContext'
+
+
 export const metadata: Metadata = {
   title: {
     template: '%s | Kiki - Premium Catering Software',
@@ -75,7 +79,9 @@ export default function RootLayout({
         <div id="__next_splash">
           <UserProvider> 
             <AppProvidersWrapper>
-              {children}
+              <EventsProvider>
+                {children}
+              </EventsProvider>
             </AppProvidersWrapper>
           </UserProvider>
         </div>

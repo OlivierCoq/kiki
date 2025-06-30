@@ -357,7 +357,7 @@ const EventsCard = ({ event }: { event: any }) => {
                                           </p>
                                         </div>
                                       </div>
-                                      <h5 className='mt-3 mb-3'>Contact Person</h5>
+                                      <h4 className='mt-3 mb-3'>Contact Person</h4>
                                       <div className="row">
                                         <div className="col-12 d-flex flex-row ">
                                           <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
