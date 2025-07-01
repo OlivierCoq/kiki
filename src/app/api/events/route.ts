@@ -25,7 +25,7 @@ export async function GET() {
     if (error) {
       throw error
     } else {
-      // console.log('Fetched events raw:', data)
+      console.log('Fetched events raw:', data)
 
 
       const get_customer_data = async ( data: any[]) => { 
@@ -110,3 +110,4 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
   }
 }
+

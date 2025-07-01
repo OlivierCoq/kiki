@@ -70,6 +70,9 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <style suppressHydrationWarning>{splashScreenStyles}</style>
+        <link href="https://db.onlinewebfonts.com/c/9c34b4c3e757c4439ed9af2a89b9709b?family=boxicons" rel="stylesheet"></link>
+        <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'></link>
+        <link href='https://cdn.boxicons.com/fonts/brands/boxicons-brands.min.css' rel='stylesheet'></link>
       </head>
       <body className={play.className}>
         <div id="splash-screen">
