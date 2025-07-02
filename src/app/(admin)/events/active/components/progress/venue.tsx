@@ -31,14 +31,19 @@ const ProgressVenue = ({ event }: { event: Event }) => {
   const VenueSelector = () => {
     return (
       <ComponentContainerCard id="basic" title="Update venue" description={'Select the venue for this event. This can be changed if needed.'}>
-        <div className="w-50 mb-3">
-          <ChoicesFormInput className="form-control" data-choices id="choices-single-default" defaultValue={event?.venue?.id} onChange={updateEvent}>
-            { venues?.map((venue: Venue, i: number) => (
-              <option value={venue?.id} key={i}>{ venue?.name }</option>
-            ))}
+        <Row>
+          <Col md={7}>
+            <ChoicesFormInput className="form-control" data-choices id="choices-single-default" defaultValue={event?.venue?.id} onChange={updateEvent}>
+              { venues?.map((venue: Venue, i: number) => (
+                <option value={venue?.id} key={i}>{ venue?.name }</option>
+              ))}
 
-          </ChoicesFormInput>
-        </div>
+            </ChoicesFormInput>
+          </Col>
+          <Col>
+            <button className="btn btn-primary btn-sm">Add new Venue</button>
+          </Col>
+        </Row>
       </ComponentContainerCard>
     )
   }
@@ -78,17 +83,9 @@ const ProgressVenue = ({ event }: { event: Event }) => {
 
   return (
     <>
-      <Row className="px-5 py-4">
+      <Row className='mt-4'>
         <Col med={6}>
-          <h5>Selected Venue</h5>
-        </Col>
-        <Col med={6} className="d-flex flex-row justify-content-end">
-          <button className="btn btn-primary btn-sm">Add new Venue</button>
-        </Col>
-      </Row>
-      <Row>
-        <Col med={6}>
-          <div className="rounded bg-light-subtle">
+          <div className="rounded bg-light p-4">
             { newVenue ? 
             <Row>
             <Col md={6}>
