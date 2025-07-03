@@ -25,7 +25,7 @@ export async function GET() {
     if (error) {
       throw error
     } else {
-      console.log('Fetched events raw:', data)
+      // console.log('Fetched events raw:', data)
 
 
       const get_customer_data = async ( data: any[]) => { 
@@ -100,7 +100,7 @@ export async function GET() {
 
       
 
-      console.log('Final event data:', event_data)
+      // console.log('Final event data:', event_data)
       // Return the final event data with merged customer, venue, and menu data
       return NextResponse.json(event_data)
     
