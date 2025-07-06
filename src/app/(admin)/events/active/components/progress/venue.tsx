@@ -194,7 +194,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
     return (
       <ComponentContainerCard id="basic" title="Update venue" description={'Select the venue for this event. This can be changed if needed.'}>
         <Row>
-          <Col md={7}>
+          <Col md={8}>
             <ChoicesFormInput className="form-control" data-choices id="choices-single-default" defaultValue={event?.venue?.id} onChange={updateEvent}>
               { venues?.map((venue: Venue, i: number) => (
                 <option value={venue?.id} key={i}>{ venue?.name }</option>
@@ -281,12 +281,20 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                   </a>
                 </div>
               </div>
-              <div className="row  mb-2">
+              <div className="row mb-2">
                 <div className="col-12 d-flex flex-row align-items-center">
                   <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
                   <a href={`mailto:${event?.venue?.contact_email}`}>
                     {event?.venue?.contact_email}
                   </a>
+                </div>
+              </div>
+              <div className="row mb-2">
+                <div className="col-12 d-flex flex-row align-items-center">
+                  <IconifyIcon icon="bx-group" fontSize='20' className="me-2" />
+                  <p className='mt-2'>
+                    {event?.venue?.capacity ? `Capacity: ${event?.venue?.capacity}` : 'No capacity information provided.'}
+                  </p>
                 </div>
               </div>
               <h5 className='mt-4'>Notes</h5>

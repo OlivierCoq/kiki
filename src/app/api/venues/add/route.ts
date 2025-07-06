@@ -7,7 +7,7 @@ const supabase = createClient(process?.env?.NEXT_PUBLIC_SUPABASE_URL!, process?.
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { name, contact_number, contact_email, contact_name, address, city, state, zip, country, notes, tags, archived, images } = body;
+  const { name, contact_number, contact_email, contact_name, address, city, state, zip, country, capacity, notes, tags, archived, images } = body;
 
   // Validate input
   if (!name || !address || !city || !state || !zip || !country) {
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         state,
         city,
         zip,
-        capacity: 0,
+        capacity,
         notes,
         tags,
         archived,
