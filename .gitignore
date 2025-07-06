@@ -5,6 +5,10 @@
 ./node_modules
 node_modules
 
+# env 
+.env
+.env.local
+
 # testing
 /coverage
 

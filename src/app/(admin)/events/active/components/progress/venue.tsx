@@ -4,7 +4,8 @@ import Link from 'next/link'
 // Bootstrap
 import { 
   Col, 
-  Row 
+  Row,
+  Card
 } from 'react-bootstrap'
 // Icons
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
@@ -17,6 +18,8 @@ import { useEvents } from '@/context/useEventsContext'
 import ComponentContainerCard from '@/components/ComponentContainerCard'
 import ChoicesFormInput from '@/components/form/ChoicesFormInput'
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
+import { USStates } from '@/assets/data/us-states'
+import { worldCountries } from '@/assets/data/world-countries'
 
 
 const ProgressVenue = ({ event }: { event: Event }) => {
@@ -31,6 +34,10 @@ const ProgressVenue = ({ event }: { event: Event }) => {
   const toggleNewVenueEntry = () => {
     setNewVenueEntry(!newVenueEntry)
   }
+  type FileWithUrl = {
+    name: string;
+    url: string;
+  }
   const [newVenueObject, setNewVenueObject] = useState({
     name: '',
     contact_number: '',
@@ -40,20 +47,93 @@ const ProgressVenue = ({ event }: { event: Event }) => {
     state: '',
     city: '',
     zip: '',
+    country: 'US',
     capacity: 0,
     notes: '',
     tags: [] as string[],
     archived: false,
-    images: [] as string[],
+    images: [] as FileWithUrl[],
   })
+  const [addingNewVenue, setAddingNewVenue] = useState(false)
+  const addNewVenue = async () => {
+    console.log('Adding new venue...', newVenueObject)
+    // if (addingNewVenue) return // Prevent multiple submissions
+    setAddingNewVenue(true)
+
+    // Validation:
+    if (
+        !newVenueObject.contact_name ||
+        !newVenueObject.name || 
+        !newVenueObject.address || 
+        !newVenueObject.city || 
+        !newVenueObject.state || 
+        !newVenueObject.zip) {
+      console.log('Please fill in all required fields.')
+      return
+    }
+    else {
+      console.log('Creating new venue in db...')
+      const res = await fetch('/api/venues/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newVenueObject)
+        })
+        const data = await res.json()
+        console.log('new venue created', data)
+        if (data?.venue) {
+          await venues?.push(data?.venue)
+          const target = await venues?.find((venue: Venue) => venue?.id === data?.venue?.id)
+          // setNewVenue(target)
+          const arrow = Number(data?.venue?.id)
+          await updateEvent(arrow)
+          toggleNewVenueEntry()
+          
+        }
+        setAddingNewVenue(false)
+      }
+    }
+  const cancelNewVenue = () => {
+    setNewVenueEntry(false)
+    setNewVenueObject({
+      name: '',
+      contact_number: '',
+      contact_email: '',
+      contact_name: '',
+      address: '',
+      state: '',
+      city: '',
+      zip: '',
+      country: 'US',
+      capacity: 0,
+      notes: '',
+      tags: [],
+      archived: false,
+      images: []
+    })
+    setAddingNewVenue(false)
+  }
+
+
+
+  // useEffect(() => {
+  //   if (event?.venue) {
+  //     setNewVenue(event?.venue)
+  //     setNewVenueObject({
+  //       ...event?.venue,
+  //       images: event?.venue?.images || []
+  //     })
+  //   }
+  // }, [event])
   // Uploaad images
   const[status, setStatus] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const handleUpload = async (files: File[]) => {
     setUploading(true)
     setStatus('Uploading images...')
-    console.log('Files to upload:', files)
     const formData = new FormData()
     files.forEach(file => {
       formData.append('images', file)
@@ -64,15 +144,16 @@ const ProgressVenue = ({ event }: { event: Event }) => {
         body: formData,
       })
       const data = await res.json()
-      if (data?.images) {
+      console.log('Upload response:', data)
+      if (data?.venue_img_files?.length) {
         setNewVenueObject({
 
           ...newVenueObject,
-          images: [...newVenueObject.images, ...data.images]
+          images: [...newVenueObject.images, ...data.venue_img_files]
         })
         setStatus('Images uploaded successfully.')
       } else {
-        setStatus('Failed to upload images.')
+        setStatus('Failed to upload images. Please change the name of files and try again.')
       }
     } catch (error) {
       console.error('Error uploading images:', error)
@@ -80,6 +161,32 @@ const ProgressVenue = ({ event }: { event: Event }) => {
     } finally {
       setUploading(false)
     }
+  }
+  const removeImg = async (image: FileWithUrl) => {
+
+    await fetch('/api/venues/upload/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ path: `uploads/${image.name}` })
+    }).then((res) => {
+      if (!res.ok) {
+        throw new Error('Failed to delete image')
+      }
+      return res.json()
+    }).then((data) => {
+      console.log('Image deleted successfully:', data)
+      setStatus('Image deleted successfully.')
+      setNewVenueObject({
+        ...newVenueObject,
+        images: newVenueObject.images.filter(img => img.name !== image.name)
+      })
+    }).catch((error) => {
+      console.error('Error deleting image:', error)
+      setStatus('Error deleting image.')
+    })  
+
   } 
 
   // Components
@@ -292,6 +399,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <Row className='mb-2'>
                   <input type="text" className='form-control' 
                     value={newVenueObject?.name} onChange={(e) => setNewVenueObject({ ...newVenueObject, name: e.target.value }) } placeholder='Venue name' />
+                  { (!newVenueObject?.name && addingNewVenue) && <small className='text-danger'>Please enter a venue name.</small> }
                 </Row>
                 <Row className='mb-2'>
                   <h6>Contact</h6>
@@ -299,14 +407,17 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <Row className='mb-2'>
                   <input type="text" className='form-control' 
                     value={newVenueObject?.contact_name} onChange={(e) => setNewVenueObject({ ...newVenueObject, contact_name: e.target.value }) } placeholder='Contact name' />
+                  { (!newVenueObject?.contact_name && addingNewVenue) && <small className='text-danger'>Please enter a contact name.</small> }
                 </Row>
                 <Row className='mb-2'>
                   <input type="text" className='form-control' 
                     value={newVenueObject?.contact_email} onChange={(e) => setNewVenueObject({ ...newVenueObject, contact_email: e.target.value }) } placeholder='Contact email' />
+                  {/* { (!newVenueObject?.contact_email && addingNewVenue) && <small className='text-danger'>Please enter a contact email.</small> } */}
                 </Row>
                 <Row className='mb-2'>
                   <input type="text" className='form-control' 
                     value={newVenueObject?.contact_number} onChange={(e) => setNewVenueObject({ ...newVenueObject, contact_number: e.target.value }) } placeholder='Contact number' />
+                  {/* { (!newVenueObject?.contact_number && addingNewVenue) && <small className='text-danger'>Please enter a contact number.</small> } */}
                 </Row>
                 <Row className='mb-2'>
                   <h6>Address</h6>
@@ -314,19 +425,53 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <Row className='mb-2'>
                   <input type="text" className='form-control' 
                     value={newVenueObject?.address} onChange={(e) => setNewVenueObject({ ...newVenueObject, address: e.target.value }) } placeholder='Street' />
+                  { (!newVenueObject?.address && addingNewVenue) && <small className='text-danger'>Please enter a street address.</small> }
                 </Row>
                 <Row className='mb-2'>
-                  <Col md={6} className='m-0 p-0'>
+                  <Col md={5} className='p-0'>
                     <input type="text" className='form-control' 
                       value={newVenueObject?.city} onChange={(e) => setNewVenueObject({ ...newVenueObject, city: e.target.value }) } placeholder='City' />
+                    { (!newVenueObject?.city && addingNewVenue) && <small className='text-danger'>Please enter a city.</small> }
                   </Col>
+                  { newVenueObject?.country === 'US' ?
+                  <Col md={4} className='pe-1'>
+                    <select id="state" name="state" className="form-control mx-0" required
+                      value={newVenueObject?.state} onChange={(e) => setNewVenueObject({ ...newVenueObject, state: e.target.value }) }>
+                      {USStates.map((state) => (
+                        <option key={state.abbreviation} value={state.abbreviation}>
+                          {state.name}  
+                        </option>   
+                      ))}
+                    </select>
+                  </Col>
+                  :
+                  <Col md={4} className='pe-1'>
+                    <input type="text" className='form-control' 
+                      value={newVenueObject?.state} onChange={(e) => setNewVenueObject({ ...newVenueObject, state: e.target.value }) } placeholder='State/Province' />
+                    { (!newVenueObject?.state && addingNewVenue) && <small className='text-danger'>Please enter a state or province.</small> }
+                  </Col>
+                  }
                   <Col>
                     <input type="text" className='form-control' 
-                      value={newVenueObject?.state} onChange={(e) => setNewVenueObject({ ...newVenueObject, state: e.target.value }) } placeholder='State' />
+                      value={newVenueObject?.zip} onChange={(e) => setNewVenueObject({ ...newVenueObject, zip: e.target.value }) } placeholder='Postal/Zip' />  
+                    { (!newVenueObject?.zip && addingNewVenue) && <small className='text-danger'>Please enter a postal code.</small> }
                   </Col>
-                  <Col>
-                    <input type="text" className='form-control' 
-                      value={newVenueObject?.zip} onChange={(e) => setNewVenueObject({ ...newVenueObject, zip: e.target.value }) } placeholder='Zip code' />  
+                </Row>
+                <Row className='mb-2'> 
+                  <Col md={6} className='m-0 p-0'></Col>
+                  
+                  
+                </Row>
+                <Row className='mb-2 mx-0 px-0'>
+                  <Col className='m-0 p-0'>
+                    <select id="country" name="country" className="form-control mx-0" required
+                      value={newVenueObject?.country} onChange={(e) => setNewVenueObject({ ...newVenueObject, country: e.target.value }) }>
+                      {worldCountries.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
                   </Col>
                 </Row>
                 <Row className='mt-3 mb-1'>
@@ -361,30 +506,50 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                         (Upload images for the venue. These will be displayed in the venue details.)
                       </span>
                     }
-                    showPreview
+                    
                     onFileUpload={handleUpload}
                   />
                 </Row>
+                <Row className='mb-2'>
+                  <Col>
+                    {uploading && <p className='text-muted'>Uploading images to server...</p>}
+                    {uploadError && <p className='text-danger'>{uploadError}</p>}
+                    {status && <p className='text-success'>{status}</p>}
+                    {newVenueObject?.images?.length > 0 && (
+                      <div className="dz-preview">
+                        {newVenueObject?.images?.map((image, idx) => (
+                          <Card className="mt-1 mb-0 shadow-none border" key={idx + '-file'}>
+                            <div className="p-2">
+                              <Row className="align-items-center">
+                                {image.name ? (
+                                  <Col className="col-auto">
+                                    <img data-dz-thumbnail="" className="avatar-sm rounded bg-light" alt={image.name} src={image.url} />
+                                  </Col>
+                                ) : ''}
+                                
+                                <Col className="text-end">
+                                  <Link href="" className="btn btn-link btn-lg text-muted shadow-none">
+                                    <div className="flex-shrink-0 ms-3">
+                                      <button data-dz-remove className="btn btn-sm btn-primary" onClick={() => removeImg(image)}>
+                                        Delete
+                                      </button>
+                                    </div>
+                                  </Link>
+                                </Col>
+                              </Row>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </Col>
+                </Row>
                 <Row className='mt-3'>
                   <Col className='me-2'>
-                    <button className='btn btn-secondary btn-sm' onClick={toggleNewVenueEntry}>Cancel</button>
+                    <button className='btn btn-secondary btn-sm' onClick={cancelNewVenue}>Cancel</button>
                   </Col>
                   <Col className='text-end'>
-                    <button className='btn btn-primary btn-sm' onClick={async () => {
-                      const res = await fetch('/api/venues', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(newVenueObject)
-                      })
-                      const data = await res.json()
-                      console.log('new venue created', data)
-                      if (data?.venue) {
-                        setNewVenue(data?.venue)
-                        toggleNewVenueEntry()
-                      }
-                    }}>Create Venue
+                    <button className='btn btn-primary btn-sm' onClick={addNewVenue} disabled={uploading}>Create Venue
                     </button>
                   </Col>
                 </Row>
