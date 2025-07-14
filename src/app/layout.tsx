@@ -20,6 +20,7 @@ const play = Play({
 
 // Context
 import { EventsProvider } from '@/context/useEventsContext'
+import { CustomersProvider } from '@/context/useCustomersContext'
 
 
 export const metadata: Metadata = {
@@ -83,7 +84,9 @@ export default function RootLayout({
           <UserProvider> 
             <AppProvidersWrapper>
               <EventsProvider>
-                {children}
+                <CustomersProvider>
+                  {children}
+                </CustomersProvider>
               </EventsProvider>
             </AppProvidersWrapper>
           </UserProvider>

@@ -98,7 +98,9 @@ export async function signup(formData: FormData) {
     await squareClient?.customers.create({
       idempotencyKey: randomUUID(), // Use a unique idempotency key for each request
       givenName: squareData?.givenName || 'New User',
+      familyName: squareData?.familyName || '',
       emailAddress: squareData?.emailAddress || '',
+      phoneNumber: formData.get('phoneNumber') as string || '',
       referenceId: '', // Store Supabase user ID in Square customer referenceId 
       address: {
         postalCode: formData.get('postalCode') as string || '',
@@ -109,8 +111,7 @@ export async function signup(formData: FormData) {
         firstName: formData.get('firstName') as string || '',
         lastName: formData.get('lastName') as string || '',
         company: formData.get('company') as string || '',
-        phoneNumber: formData.get('phoneNumber') as string || '',
-        country: formData?.get('country') as string || '',
+        country: formData?.get('country') as string || ''
       }
     }).then(async(response) => {
       

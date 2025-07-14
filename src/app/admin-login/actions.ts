@@ -62,6 +62,6 @@ export async function signup(formData: FormData) {
     redirect('/error')
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  revalidatePath('/events/active', 'layout')
+  redirect('/events/active')
 }

@@ -29,7 +29,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
   const [loading, setLoading] = useState(true)
   const [newEvent, setNewEvent] = useState<Event | null>(null)
   const [newVenue, setNewVenue] = useState<Venue | null>(null)
-  // Adding new venue to db
+  // Adding new venue to db 
   const [newVenueEntry, setNewVenueEntry] = useState(false)
   const toggleNewVenueEntry = () => {
     setNewVenueEntry(!newVenueEntry)
@@ -55,6 +55,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
     images: [] as FileWithUrl[],
   })
   const [addingNewVenue, setAddingNewVenue] = useState(false)
+
   const addNewVenue = async () => {
     console.log('Adding new venue...', newVenueObject)
     // if (addingNewVenue) return // Prevent multiple submissions
@@ -84,15 +85,11 @@ const ProgressVenue = ({ event }: { event: Event }) => {
         console.log('new venue created', data)
         if (data?.venue) {
           await venues?.push(data?.venue)
-          const target = await venues?.find((venue: Venue) => venue?.id === data?.venue?.id)
-          // setNewVenue(target)
-          const arrow = Number(data?.venue?.id)
-          await updateEvent(arrow)
+          await updateEvent(Number(data?.venue?.id))
           toggleNewVenueEntry()
-          
         }
         setAddingNewVenue(false)
-      }
+      } 
     }
   const cancelNewVenue = () => {
     setNewVenueEntry(false)
@@ -133,7 +130,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
 
   const handleUpload = async (files: File[]) => {
     setUploading(true)
-    setStatus('Uploading images...')
+    setStatus('Uploading images to server...')
     const formData = new FormData()
     files.forEach(file => {
       formData.append('images', file)
@@ -398,7 +395,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
         <Col med={6}>
           <VenueSelector />
           { newVenueEntry && 
-            <Row className='mx-2 w-100'>
+            <Row className='mx-2 w-100 fade-in'>
               <Col>
                 <Row>
                   <h5>New Venue</h5>
@@ -520,7 +517,6 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 </Row>
                 <Row className='mb-2'>
                   <Col>
-                    {uploading && <p className='text-muted'>Uploading images to server...</p>}
                     {uploadError && <p className='text-danger'>{uploadError}</p>}
                     {status && <p className='text-success'>{status}</p>}
                     {newVenueObject?.images?.length > 0 && (
@@ -557,8 +553,12 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                     <button className='btn btn-secondary btn-sm' onClick={cancelNewVenue}>Cancel</button>
                   </Col>
                   <Col className='text-end'>
-                    <button className='btn btn-primary btn-sm' onClick={addNewVenue} disabled={uploading}>Create Venue
-                    </button>
+                    <button className='btn btn-primary btn-sm' onClick={addNewVenue} disabled={uploading}>Create Venue</button>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col className='mt-2'>
+                    {addingNewVenue && <p className='text-success'>Adding new venue...</p>}
                   </Col>
                 </Row>
               </Col>

@@ -19,14 +19,14 @@ const page = () => {
           </div>
           <div className="d-flex align-items-center gap-1">
             <ThemeModeToggle />
-{/* 
-            <Suspense>
+
+            {/* <Suspense>
               <Notifications />
-            </Suspense>
+            </Suspense> */}
 
-            <ThemeCustomizerToggle />
+            {/* <ThemeCustomizerToggle /> */}
 
-            <ActivityStreamToggle /> */}
+            {/* <ActivityStreamToggle /> */}
 
             <ProfileDropdown />
             <form className="app-search d-none d-md-block ms-2">

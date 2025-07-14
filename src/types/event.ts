@@ -1,13 +1,19 @@
+export type VenueImage = {
+  name: string
+  url: string
+}
+
 export type Venue = {
   id: number
   address: string
   archived: false
-  capacity: false
+  capacity: number
   city: string
+  country: string
   contact_email: string
   contact_name: string
   contact_number: string
-  images: string[] | null
+  images: VenueImage[] | null
   name: string
   notes: string
   tags: string[] | null
@@ -27,23 +33,26 @@ export type Event = {
   customer: {
     created_at: string
     email: string
-    id: number
+    id: number 
     square_data: {
       customer: {
         created_at: string
         creationSource: string
         emailAddress: string
         givenName: string
+        familyName: string
+        phoneNumber: string
         id: string
         address: {
           addressLine1: string
-          administrativeDistrictLevel1: string | null
-          administrativeDistrictLevel2: string | null
+          addressLine2: string | null 
+          administrativeDistrictLevel1: string
+          administrativeDistrictLevel2: string
           country: string
           locality: string
-          phoneNumber: string
           postalCode: string
         }
+        
         preferences: {
           emailUnsubscribed: boolean
         }

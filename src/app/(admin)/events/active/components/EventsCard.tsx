@@ -51,6 +51,14 @@ const EventsCard = ({ event }: { event: any }) => {
     setDeleteEvent(!deleteEvent)
   }
 
+  // UI
+  const time_convert = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const convertedHours = hours % 12 || 12; // Convert to 12-hour format
+    return `${convertedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  } 
+
   // console.log('Event', event)
 
 
@@ -221,7 +229,7 @@ const EventsCard = ({ event }: { event: any }) => {
   }
 
   return (
-    <Col md={3}>
+    <Col md={3} className='fade-in'>
       <Card className=" mb-4">
         <CardBody>
           <CardTitle className="text-xl font-semibold mb-2">{event.name}</CardTitle>
@@ -285,7 +293,8 @@ const EventsCard = ({ event }: { event: any }) => {
                                 <div className="mb-0 row">
                                   <div className="col-12  d-flex flex-row ">
                                     <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
-                                    <p>{customer?.givenName }</p>
+                                    <p>{customer?.givenName }</p> &nbsp;
+                                    <p>{customer?.familyName }</p>
                                   </div>
                                   <div className="col-12 d-flex flex-row align-items-center mb-2">
                                     <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
@@ -315,7 +324,7 @@ const EventsCard = ({ event }: { event: any }) => {
 
                               : 
 
-                              <div className="d-flex flex-column">
+                              <div className="d-flex flex-column fade-in">
                                 <Row>
                                   <Col>
                                     <div className="d-flex flex-row align-items-center mb-1">
@@ -391,19 +400,33 @@ const EventsCard = ({ event }: { event: any }) => {
                         <Card className='bg-light h-100'>
                           <CardBody>
                             <CardTitle className="text-lg font-semibold mb-2">
-                              Notes &nbsp;
-                              <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" onClick={toggleNotesEdit} />
+                              Details
                             </CardTitle>
+                            <p className='mb-1'>Time</p>
+                            <div className='d-flex flex-row align-items-center mb-2'>
+                              <IconifyIcon icon="bx-calendar" fontSize='20' className="me-2" />
+                              <p className='mb-0'>Date: { event?.date }</p>
+                            </div>
+                            {/* Start and end time: */}
+                            <div className='d-flex flex-row align-items-center mb-2'>
+                              <IconifyIcon icon="bx-time" fontSize='20' className="me-2" />
+                              <p className='mb-0'>Start: { time_convert(event?.start_time) } - End: { time_convert(event?.end_time) }</p>
+                            </div>
+                            
+                            <div className='d-flex flex-row align-items-center mt-4 mb-1'>
+                              <p className='mb-0'>Notes &nbsp;</p>
+                              <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" onClick={toggleNotesEdit} />
+                            </div>
                             {
                             editNotes ? 
                               
-                              <div className='d-flex flex-column justify-content-end align-items-end'>
+                              <div className='d-flex flex-column justify-content-end align-items-end fade-in'>
                                 <textarea className='form-control' value={newNotes} rows={10} onChange={e => setNewNotes(e.target.value)}></textarea>
                                 <button className='rounded btn' onClick={editEventNotes}>
                                   <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
                                 </button>
                               </div>
-                              : <p>{ newNotes }</p>
+                              : <div dangerouslySetInnerHTML={{ __html: newNotes }}></div>
                             }
                             
                           </CardBody>

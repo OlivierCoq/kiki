@@ -13,9 +13,13 @@ const squareClient = new SquareClient({
   token: process.env.NEXT_PUBLIC_SQUARE_ACCESS_TOKEN,
 })
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) { 
-
-
-
-
+export async function GET(request: NextRequest) {
+  try {
+    const { data, error } = await supabase.from('customers').select('*')
+    if (error) throw error
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error fetching customers:', error)
+    return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 })
+  }
 }
