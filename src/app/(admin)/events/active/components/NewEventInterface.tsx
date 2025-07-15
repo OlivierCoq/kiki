@@ -303,23 +303,24 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           // Reset the newCustomer state
           // Update the newEvent state with the new customer ID
           setPostingNewCustomer(false)
-        setNewEvent((prev) => ({
-          ...prev,
-          customer: {   
-            ...prev.customer,
-            id: data?.customer?.id, // Assuming the backend returns the new customer ID
-            square_data: {
-              ...prev.customer.square_data,
-              customer: {
-                ...prev.customer.square_data.customer,
-                id: data?.customer?.id, // Update the customer ID
-                address: {
-                  ...prev.customer.square_data.customer.address
-                }
-              }
-            }
-          }
-        }))
+        // setNewEvent((prev) => ({
+        //   ...prev,
+        //   customer: {   
+        //     ...prev.customer,
+        //     id: data?.customer?.id, // Assuming the backend returns the new customer ID
+        //     square_data: {
+        //       ...prev.customer.square_data,
+        //       customer: {
+        //         ...prev.customer.square_data.customer,
+        //         id: data?.customer?.id, // Update the customer ID
+        //         address: {
+        //           ...prev.customer.square_data.customer.address
+        //         }
+        //       }
+        //     }
+        //   }
+        // }))
+        
         setNewEventObj((prev: any) => ({
           ...prev,
           customer: data.id // Update the newEventObj with the new customer ID
@@ -398,7 +399,12 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                     <label className="form-label">Customer</label>
                     <ChoicesFormInput className="form-control" data-choices id="choices-single-default" defaultValue={0} onChange={(e) => { 
                         // newEventObj.customer = parseInt(e?.target.?value, 10)
-                        setNewEventObj({ ...newEventObj, customer: parseInt(e?.target?.value, 10) })
+                        // console.log('Selected customer ID:', e?.target?.value)
+                        // Turn e into a number:
+                        setNewEventObj((prev: any) => ({
+                          ...prev,
+                          customer: Number(e)
+                        }))
                       }}>
                         { customers?.map((customer: any, i: number) => (
                           <option value={customer?.id} key={i}>{ customer?.square_data?.customer?.givenName } { customer?.square_data?.customer?.familyName }</option>
