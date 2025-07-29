@@ -20,7 +20,7 @@ import { NewEventInterface } from './components/NewEventInterface'
 
 const ActiveEventsPage = () => {
 
-
+ 
 // pull events from the database:
 // const supabase = await createClient()
   // const [events, setEvents] = useState<any[]>([])
@@ -36,8 +36,12 @@ const ActiveEventsPage = () => {
 
   useEffect(() => {
     if (!events) {
-      fetchEvents()
-      setLoading(false)
+      fetchEvents().then(() => {
+        setLoading(false) // Set loading to false after fetching events
+      }).catch((error:any ) => {
+        console.error('Error fetching events:', error)
+        setLoading(false) // Set loading to false even if there's an error
+      })
     } else { setLoading(false) }
   }, [])
 
@@ -66,7 +70,7 @@ const ActiveEventsPage = () => {
         <h3 className="mb-2">Active Events</h3>
         <p className="text-muted mb-4">Manage your active events here. You can view, edit, or delete events.</p>
       </Col>
-      <NewEventInterface onNewEvent={handleNewEvent} />
+      <NewEventInterface onNewEvent={handleNewEvent} /> 
       <Col md={12}>
         <Row>
         {(events?.length > 0) && !loading ? (
