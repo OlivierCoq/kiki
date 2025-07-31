@@ -17,6 +17,8 @@ import EventsCard from './components/EventsCard'
 import { Event, Venue, ProgressEventStep, VenueImage } from '@/types/event'
 
 import { NewEventInterface } from './components/NewEventInterface'
+import DropzoneFormInput from '@/components/form/DropzoneFormInput'
+
 
 const ActiveEventsPage = () => {
 

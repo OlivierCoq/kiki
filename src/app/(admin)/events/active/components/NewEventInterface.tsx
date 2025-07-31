@@ -6,11 +6,12 @@ import {
   Col, 
   Row,
   Modal,
-  FormCheck
+  FormCheck,
+  Card
 } from 'react-bootstrap'
 
 import { useEffect, useState, useRef } from 'react'
-
+import Link from 'next/link'
 // Types
 import { Event, Venue, ProgressEventStep, VenueImage } from '@/types/event'
 
@@ -20,7 +21,7 @@ import { Event, Venue, ProgressEventStep, VenueImage } from '@/types/event'
 import { USStates } from '@/assets/data/us-states'
 import { worldCountries } from '@/assets/data/world-countries'
 import ChoicesFormInput from '@/components/form/ChoicesFormInput'
-
+import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 // Components
 
 // Context
@@ -206,7 +207,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       notes: '',
       tags: [] as string[] | null,
       zip: '',
-      state: ''
+      state: 'TN'
     } as Venue
   })
 
@@ -390,10 +391,81 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         notes: '',
         tags: [] as string[] | null,
         zip: '',
-        state: ''
+        state: 'TN' // Preset to Tennessee
       }
     }))
   }
+  const updateVenue = (updatedVenue: Partial<typeof newEvent.venue>) => {
+    setNewEvent(prev => ({
+      ...prev,
+      venue: {
+        ...prev.venue,
+        ...updatedVenue
+      }
+    }));
+  }
+  type FileWithUrl = {
+    name: string;
+    url: string;
+  }
+  const[status, setStatus] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const handleUpload = async (files: File[]) => {
+    setUploading(true)
+    setStatus('Uploading images to server...')
+    const formData = new FormData()
+    files.forEach(file => {
+      formData.append('images', file)
+    })
+    try {
+      const res = await fetch('/api/venues/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+      console.log('Upload response:', data)
+      if (data?.venue_img_files?.length) {
+        updateVenue({
+          images: [...(newEvent.venue.images ?? []), ...data.venue_img_files]
+        })
+        setStatus('Images uploaded successfully.')
+      } else {
+        setStatus('Failed to upload images. Please change the name of files and try again.')
+      }
+    } catch (error) {
+      console.error('Error uploading images:', error)
+      setStatus('Error uploading images.')
+    } finally {
+      setUploading(false)
+    }
+  }
+  const removeImg = async (image: FileWithUrl) => {
+
+    await fetch('/api/venues/upload/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ path: `uploads/${image.name}` })
+    }).then((res) => {
+      if (!res.ok) {
+        throw new Error('Failed to delete image')
+      }
+      return res.json()
+    }).then((data) => {
+      console.log('Image deleted successfully:', data)
+      setStatus('Image deleted successfully.')
+      updateVenue({
+        ...newEvent.venue,
+        images: (newEvent?.venue?.images ?? []).filter(img => img.name !== image.name)
+      })
+    }).catch((error) => {
+      console.error('Error deleting image:', error)
+      setStatus('Error deleting image.')
+    })  
+
+  } 
 
 
    // Event
@@ -620,7 +692,118 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
               </Row>
 
               {
-                newVenue
+                newVenue &&
+                // <p>NEW VENUE</p>
+                <div className="mt-2 px-2 " style={{ height: '500px', overflowY: 'scroll' }}> 
+                  <small className='mt-2 mb-4'>New venue details</small>
+                  <Row className='mb-2 mt-1'>
+                    <input type="text" className="form-control" value={newEvent.venue.name} onChange={(e) =>  updateVenue({ name: e.target.value })  } />
+                  </Row> 
+                  <Row>
+                    <h6>Contact</h6>
+                    <input type="text" className="form-control mb-1" placeholder='Name' value={newEvent.venue.contact_name} onChange={(e) =>  updateVenue({ contact_name: e.target.value })  } />
+                    <input type="text" className="form-control mb-1" placeholder='Email' value={newEvent.venue.contact_email} onChange={(e) =>  updateVenue({ contact_email: e.target.value })  } />
+                    <input type="text" className="form-control mb-1" placeholder='Phone number' value={newEvent.venue.contact_number} onChange={(e) =>  updateVenue({ contact_number: e.target.value })  } />
+                  </Row>
+                  <Row>
+                    <h6>Address</h6>
+                    <Col>
+                      <Row className='mb-1'>
+                        <input type="text" className="form-control" placeholder='Street' value={newEvent.venue.address} onChange={(e) =>  updateVenue({ address: e.target.value })  } />
+                      </Row>
+                      <Row>
+                        <Col className='mx-0 px-0'>
+                          <input type="text" className="form-control" placeholder='City' value={newEvent.venue.city} onChange={(e) =>  updateVenue({ city: e.target.value })  } />
+                        </Col>
+                        <Col className='mx-0 px-1'>
+                          <select id="state" name="state" className="form-control mx-0" required
+                              value={newEvent.venue.state} onChange={(e) =>  updateVenue({ state: e.target.value })  }>
+                              {USStates.map((state) => (
+                                <option key={state.abbreviation} value={state.abbreviation}>
+                                  {state.name}  
+                                </option>   
+                              ))}
+                            </select>
+                        </Col>
+                        <Col className='mx-0 px-0'>
+                          <input type="text" className="form-control" placeholder='Zip/Postal' value={newEvent.venue.zip} onChange={(e) =>  updateVenue({ zip: e.target.value })  } />
+                        </Col>
+                      </Row>
+                    </Col>
+                  </Row>
+                  <Row className='pt-2'>
+                    <h6>Additional</h6>
+                    <Col>
+                      <Row className='mb-1'>
+                        <Col className='px-0'>
+                          <label className='form-label'>Capacity</label>
+                          <input type="number" className="form-control" value={newEvent.venue.capacity} onChange={(e) =>  updateVenue({ capacity: Number(e.target.value) })  } />
+                        </Col>
+                        <Col>
+                          <label className='form-label'>Tags</label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Tags (comma separated)"
+                            value={Array.isArray(newEvent.venue.tags) ? newEvent.venue.tags.join(',') : ''}
+                            onChange={e => updateVenue({ tags: e.target.value.split(',').map(tag => tag.trim()) })}
+                          />
+                        </Col>
+                      </Row>
+                      <Row>
+                      <textarea className='form-control' rows={8} 
+                        value={newEvent.venue.notes} onChange={(e) => updateVenue({  notes: e.target.value }) } placeholder='Notes' /> 
+                      </Row>
+                    </Col>
+                  </Row>
+                  <Row className='pt-2'>
+                    <h6>Images</h6>
+                  </Row>
+                  <Row className='mb-2'>
+                      <DropzoneFormInput
+                        iconProps={{ icon: 'bx:cloud-upload', height: 36, width: 36 }}
+                        text="Drop files here or click to upload."
+                        helpText={
+                          <span className="text-muted fs-13">
+                            (Upload images for the venue. These will be displayed in the venue details.)
+                          </span>
+                        }
+                        
+                        onFileUpload={handleUpload}
+                      />
+                    </Row>
+                  <Col>
+                    {uploadError && <p className='text-danger'>{uploadError}</p>}
+                    {status && <p className='text-success'>{status}</p>}
+                    {(newEvent.venue?.images?.length ?? 0) > 0 && (
+                      <div className="dz-preview">
+                        {(newEvent.venue?.images ?? []).map((image, idx) => (
+                          <Card className="mt-1 mb-0 shadow-none border" key={idx + '-file'}>
+                            <div className="p-2">
+                              <Row className="align-items-center">
+                                {image.name ? (
+                                  <Col className="col-auto">
+                                    <img data-dz-thumbnail="" className="avatar-sm rounded bg-light" alt={image.name} src={image.url} />
+                                  </Col>
+                                ) : ''}
+                                
+                                <Col className="text-end">
+                                  <Link href="" className="btn btn-link btn-lg text-muted shadow-none">
+                                    <div className="flex-shrink-0 ms-3">
+                                      <button data-dz-remove className="btn btn-sm btn-primary" onClick={() => removeImg(image)}>
+                                        Delete
+                                      </button>
+                                    </div>
+                                  </Link>
+                                </Col>
+                              </Row>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </Col>
+                </div>
 
               }
 
