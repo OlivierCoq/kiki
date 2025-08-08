@@ -25,7 +25,7 @@ export async function GET() {
     if (error) {
       throw error
     } else {
-      console.log('Fetched venues raw:', data)
+      // console.log('Fetched venues raw:', data)
       data
 
 

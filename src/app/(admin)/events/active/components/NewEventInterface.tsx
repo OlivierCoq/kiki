@@ -172,9 +172,9 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     },
     date: '',
     end_time: '',
-    id: 0,
+    id: 1,
     menu: {
-      id: 0,
+      id: 1,
       archived: false,
       created_at: new Date().toISOString(),
       description: '',
@@ -195,7 +195,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     start_time: '',
     status: '',
     venue: {
-      id: 0,
+      id: 1,
       address: '',
       archived: false,
       capacity: 0,
@@ -228,26 +228,26 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
 
   // handlers/methods
     // Form helpers
-  const updateNestedCustomerField = (field: string, value: string) => {
-    setNewEvent((prev) => ({
-      ...prev,
-      customer: {
-        ...prev.customer,
-        square_data: {
-          ...prev.customer.square_data,
-          customer: {
-            ...prev.customer.square_data.customer,
-            address: {
-              ...prev.customer.square_data.customer.address,
-              [field]: value
-            }
-          }
-        }
-      }
-    }))
-  }
-  // const updateNestedValue = (path: string, value: any) => {
-  //   setNewEvent(prev =>
+  // const updateNestedCustomerField = (field: string, value: string) => {
+  //   setNewEvent((prev) => ({
+  //     ...prev,
+  //     customer: {
+  //       ...prev.customer,
+  //       square_data: {
+  //         ...prev.customer.square_data,
+  //         customer: {
+  //           ...prev.customer.square_data.customer,
+  //           address: {
+  //             ...prev.customer.square_data.customer.address,
+  //             [field]: value
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }))
+  // }
+  // // const updateNestedValue = (path: string, value: any) => {
+  // //   setNewEvent(prev =>
   //     produce(prev, draft => {
   //       const keys = path.split('.');
   //       let temp: any = draft;
@@ -324,6 +324,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
 
       // send to backend
       await setLoading(true)
+      newEventStatus += ' Adding new customer...'
       await fetch('/api/customers/add', {
         method: 'POST',
         headers: {
@@ -490,6 +491,36 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
   } 
   const addNewVenue = async () => {
 
+    // Validation:
+    if (
+      !newEvent.venue.contact_name ||
+      !newEvent.venue.name || 
+      !newEvent.venue.contact_email ||
+      !newEvent.venue.address || 
+      !newEvent.venue.city || 
+      !newEvent.venue.state || 
+      !newEvent.venue.zip) {
+    console.log('Please fill in all required fields.')
+    return
+  }
+  else {
+    console.log('Creating new venue in db...')
+    newEventStatus += ' Adding new venue...'
+    const res = await fetch('/api/venues/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newEvent.venue)
+      })
+      const data = await res.json()
+      console.log('new venue created', data)
+      if (data?.venue) {
+        await venues?.push(data?.venue)
+      }
+      // setAddingNewVenue(false)
+     
+    } 
     
   }
 
@@ -517,15 +548,43 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       console.log('Fix ur shit: ', newEventObj)
       
       toggleValidating()
-      return false
+      return 
     } else {
         toggleValidating()
         console.log('sending to backend: ', newEventObj)
-        // if(newCustomer) { await addNewCustomer() }
-        // if(newVenue) { await addNewVenue() }
-    
-        console.log('Submitting new event:', newEvent)
-        await onNewEvent(newEventObj)
+        if(newCustomer || newVenue) {
+          if(newCustomer) { await addNewCustomer() }
+          if(newVenue) { await addNewVenue() }
+          await onNewEvent(newEventObj)
+
+          // send to DB
+          console.log('Submitting new event:', newEventObj)
+          // send to backend
+          await fetch('/api/events/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newEventObj)
+          }).then((res_data) => {
+            console.log('Event created, sent to local API endpoint:', res_data)
+          })
+          
+        }
+        else {
+          
+
+          await fetch('/api/events/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newEventObj)
+          }).then(async (res_data) => {
+            await onNewEvent(newEventObj)
+            console.log('Event created, sent to local API endpoint:', res_data)
+          })
+        }
     }
   }
 
@@ -614,50 +673,65 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                   <Col>
                     <small>New Customer Info</small>
                     <div className="d-flex flex-row align-items-center mt-2 mb-1">
-                      <IconifyIcon icon="bx-user" fontSize='45' className="me-2" />
-                      <input type="text" 
-                        id="givenName"
-                        name="givenName"
-                        placeholder='First Name'
-                        className='form-control' defaultValue={ newEvent?.customer?.square_data?.customer?.givenName || ''} 
-                        onChange={(e) => { updateNestedValue('customer.square_data.customer.givenName', e.target.value, setNewEvent) }}
-                      />
-                      <input type="text" 
+                      <IconifyIcon icon="bx-user" fontSize='25' className="me-2" />
+                      <Col>
+                        <input type="text" 
+                          id="givenName"
+                          name="givenName"
+                          placeholder='First Name'
+                          className='form-control' defaultValue={ newEvent?.customer?.square_data?.customer?.givenName || ''} 
+                          onChange={(e) => { updateNestedValue('customer.square_data.customer.givenName', e.target.value, setNewEvent) }}
+                        />
+                        { validating && newCustomer && !newEvent.customer?.square_data?.customer?.givenName.length && <small className="text-danger">Please enter a first name.</small> }
+                      </Col>
+                      <Col> 
+                        <input type="text" 
                         id="familyName"
                         name="familyName"
                         placeholder='Last Name'
                         className='form-control ms-2' defaultValue={ newEvent?.customer?.square_data?.customer?.familyName || ''} 
                         onChange={(e) => { updateNestedValue('customer.square_data.customer.familyName', e.target.value, setNewEvent) }}
-                    />
+                      />
+                      { validating && newCustomer && !newEvent.customer?.square_data?.customer?.familyName.length && <small className="text-danger">Please enter a last name.</small> }
+                    </Col>
                     </div>
                     <div className="d-flex flex-row align-items-center mb-1">
                       <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
+                      <Col>
                       <input type="text" 
                         placeholder='Email'
                         className='form-control' defaultValue={ newEvent?.customer?.square_data?.customer?.emailAddress || ''} 
                         onChange={(e) => { updateNestedValue('customer.square_data.customer.emailAddress', e.target.value, setNewEvent) }}    
-                    />
+                      />
+                      { validating && newCustomer && !newEvent.customer?.square_data?.customer?.emailAddress.length && <small className="text-danger">Please enter a proper email address.</small> }
+                      </Col>
                     </div>
                     <div className="d-flex flex-row align-items-center mb-1">
                       <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
-                      <input  
-                        id="phoneNumber"
-                        name="phoneNumber"
-                        type="tel"
-                        placeholder='+1-234-567-8910'
-                        className='form-control' defaultValue={ newEvent?.customer?.square_data?.customer?.phoneNumber || ''} 
-                        onChange={(e) => { updateNestedValue('customer.square_data.customer.phoneNumber', e.target.value, setNewEvent) }}
-                    />
+                      <Col>
+                        <input  
+                          id="phoneNumber"
+                          name="phoneNumber"
+                          type="tel"
+                          placeholder='+1-234-567-8910'
+                          className='form-control' defaultValue={ newEvent?.customer?.square_data?.customer?.phoneNumber || ''} 
+                          onChange={(e) => { updateNestedValue('customer.square_data.customer.phoneNumber', e.target.value, setNewEvent) }}
+                        />
+                         { validating && newCustomer && !newEvent.customer?.square_data?.customer?.phoneNumber.length && <small className="text-danger">Please enter a phone number.</small> }
+                      </Col>
                     </div>
                     <div className="d-flex flex-row align-items-center mb-1">
                       <IconifyIcon icon="bx-map" fontSize='20' className="me-2" />
                       <div className="d-flex flex-column w-auto">
-                        <input type="text" 
-                          placeholder='Address Line 1'
-                          style={{width: '15rem'}}
-                          className='form-control ms-2 mb-1' defaultValue={ newEvent?.customer?.square_data?.customer?.address?.addressLine1 || ''} 
-                          onChange={(e) => { updateNestedValue('customer.square_data.customer.address.addressLine1', e.target.value, setNewEvent) }}
-                        />
+                        <Col>
+                          <input type="text" 
+                            placeholder='Address Line 1'
+                            style={{width: '15rem'}}
+                            className='form-control ms-2 mb-1' defaultValue={ newEvent?.customer?.square_data?.customer?.address?.addressLine1 || ''} 
+                            onChange={(e) => { updateNestedValue('customer.square_data.customer.address.addressLine1', e.target.value, setNewEvent) }}
+                          />
+                          { validating && newCustomer && !newEvent.customer?.square_data?.customer?.address.addressLine1.length && <small className="text-danger">Please enter an address line 1.</small> }
+                        </Col>
                         <input type="text" 
                           placeholder='Address Line 2'
                           style={{width: '15rem'}}
@@ -665,11 +739,14 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                           onChange={(e) => { updateNestedValue('customer.square_data.customer.address.addressLine2', e.target.value, setNewEvent) }}
                         />
                         <div className="w-full d-flex flex-row align-items-center justify-content-center mb-1">
+                          <Col>
                           <input type="text" 
                             placeholder='City'
                             style={{width: '8rem'}}
                             className='form-control ms-1' defaultValue={ newEvent?.customer?.square_data?.customer?.address?.locality || ''} 
                             onChange={(e) => updateNestedValue('customer.square_data.customer.address.locality', e.target.value, setNewEvent) } />
+                            { validating && newCustomer && !newEvent.customer?.square_data?.customer?.address.locality.length && <small className="text-danger">Please enter a city.</small> }
+                            </Col>
                             {/* If country is US */}
                             { newEvent?.customer?.square_data?.customer?.address?.country === 'US' &&
                               <select 
@@ -692,11 +769,14 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                             }
                         </div>
                         <div className="w-full d-flex flex-row align-items-start justify-content-start">
+                          <Col>
                           <input type="text" 
                             placeholder='Zip/Postal'
                             style={{width: '7rem'}}
                             className='form-control ms-2 me-1' defaultValue={ newEvent?.customer?.square_data?.customer?.address?.postalCode || ''} 
                             onChange={(e) => { updateNestedValue('customer.square_data.customer.address.postalCode', e.target.value, setNewEvent) }}/>
+                            { validating && newCustomer && !newEvent.customer?.square_data?.customer?.address.postalCode.length && <small className="text-danger">Please enter a zip/postal code.</small> }
+                            </Col>
                           <select 
                             className='form-select ms-2' 
                             style={{width: '6rem'}}
@@ -765,11 +845,14 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                   <small className='mt-2 mb-4'>New venue details</small>
                   <Row className='mb-2 mt-1'>
                     <input type="text" className="form-control" value={newEvent.venue.name} onChange={(e) =>  updateNestedValue('venue.name', e.target.value, setNewEvent)} />
+                    { validating && newVenue && !newEvent.venue.name.length && <small className="text-danger mb-1">Please enter an venue name.</small> }
                   </Row> 
                   <Row>
                     <h6>Contact</h6>
                     <input type="text" className="form-control mb-1" placeholder='Name' value={newEvent.venue.contact_name} onChange={(e) =>  updateNestedValue('venue.contact_name', e.target.value, setNewEvent)}  />
+                    { validating && newVenue && !newEvent.venue.contact_name.length && <small className="text-danger mb-1">Please enter an venue contact person name.</small> }
                     <input type="text" className="form-control mb-1" placeholder='Email' value={newEvent.venue.contact_email} onChange={(e) =>  updateNestedValue('venue.contact_email', e.target.value, setNewEvent)}  />
+                    { validating && newVenue && !newEvent.venue.contact_email.length && <small className="text-danger mb-1">Please enter an venue contact email.</small> }
                     <input type="text" className="form-control mb-1" placeholder='Phone number' value={newEvent.venue.contact_number} onChange={(e) =>  updateNestedValue('venue.contact_number', e.target.value, setNewEvent)}  />
                   </Row>
                   <Row>
@@ -777,10 +860,12 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                     <Col>
                       <Row className='mb-1'>
                         <input type="text" className="form-control" placeholder='Street' value={newEvent.venue.address} onChange={(e) =>  updateNestedValue('venue.address', e.target.value, setNewEvent)} />
+                        { validating && newVenue && !newEvent.venue.address.length && <small className="text-danger mb-1">Please enter an venue address.</small> }
                       </Row>
                       <Row>
                         <Col className='mx-0 px-0'>
                           <input type="text" className="form-control" placeholder='City' value={newEvent.venue.city} onChange={(e) =>  updateNestedValue('venue.city', e.target.value, setNewEvent)} />
+                          { validating && newVenue && !newEvent.venue.city.length && <small className="text-danger mb-1">Please enter an venue city.</small> }
                         </Col>
                         <Col className='mx-0 px-1'>
                           <select id="state" name="state" className="form-control mx-0" required
@@ -794,6 +879,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                         </Col>
                         <Col className='mx-0 px-0'>
                           <input type="text" className="form-control" placeholder='Zip/Postal' value={newEvent.venue.zip} onChange={(e) =>  updateNestedValue('venue.zip', e.target.value, setNewEvent)}/>
+                          { validating && newVenue && !newEvent.venue.zip.length && <small className="text-danger mb-1">Please enter an venue zip or postal code.</small> }
                         </Col>
                       </Row>
                     </Col>
@@ -885,14 +971,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                     
                     id="event-venue-choice"
                     defaultValue={newEvent?.venue?.id || ""}
-                    onChange={e => {
-                      setNewEvent({
-                        ...newEvent,
-                        venue: venues.find(
-                          (venue: any) => venue?.id === Number(e)
-                        ),
-                      });
-                    }}
+                    onChange={(e) => { updateNestedValue('venue', venues.find((venue: any) => venue?.id === Number(e)), setNewEvent) }}
                   >
                     {venues?.map((venue: any, i: number) => (
                       <option value={venue?.id} key={venue?.id}>
