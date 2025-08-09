@@ -29,6 +29,14 @@ const ProgressVenue = ({ event }: { event: Event }) => {
   const [loading, setLoading] = useState(true)
   const [newEvent, setNewEvent] = useState<Event | null>(null)
   const [newVenue, setNewVenue] = useState<Venue | null>(null)
+
+  // UI
+  const formatNotes = (notes: string) => {
+    // Convert new lines to <br> for HTML display
+    return notes.replace(/\n/g, '<br>');
+  }
+
+
   // Adding new venue to db 
   const [newVenueEntry, setNewVenueEntry] = useState(false)
   const toggleNewVenueEntry = () => {
@@ -274,7 +282,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
                     <a href={`tel:${event?.venue?.contact_number}`}>
-                      {event?.venue?.contact_number}
+                      {event?.venue?.contact_number || 'No contact number provided.'}
                     </a>
                   </div>
                 </div>
@@ -282,7 +290,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
                     <a href={`mailto:${event?.venue?.contact_email}`}>
-                      {event?.venue?.contact_email}
+                      {event?.venue?.contact_email || 'No contact email provided.'}
                     </a>
                   </div>
                 </div>
@@ -298,9 +306,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <div className="row mb-2">
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
-                    <p className='mt-2'>
-                      {event?.venue?.notes || 'No additional notes provided.'}
-                    </p>
+                    <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatNotes(event?.venue?.notes) || 'No additional notes provided.' }}></div>
                   </div>
                 </div>
               </Col>
@@ -343,14 +349,14 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <div className="row">
                   <div className="col-12 d-flex flex-row ">
                     <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
-                    <p>{event?.venue?.contact_name}</p>
+                    <p>{event?.venue?.contact_name || 'No contact name provided.'}</p>
                   </div>
                 </div>
                 <div className="row mb-2">
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
                     <a href={`tel:${event?.venue?.contact_number}`}>
-                      {event?.venue?.contact_number}
+                      {event?.venue?.contact_number || 'No contact number provided.'}
                     </a>
                   </div>
                 </div>
@@ -358,7 +364,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
                     <a href={`mailto:${event?.venue?.contact_email}`}>
-                      {event?.venue?.contact_email}
+                      {event?.venue?.contact_email || 'No contact email provided.'}
                     </a>
                   </div>
                 </div>
@@ -366,9 +372,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <div className="row mb-2">
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
-                    <p className='mt-2'>
-                      {event?.venue?.notes || 'No additional notes provided.'}
-                    </p>
+                    <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatNotes(event?.venue?.notes) || 'No additional notes provided.' }}></div>
                   </div>
                 </div>
               </Col>

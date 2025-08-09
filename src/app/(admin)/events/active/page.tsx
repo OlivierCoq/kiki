@@ -52,8 +52,13 @@ const ActiveEventsPage = () => {
   const handleNewEvent = (ev: any) => {
     console.log('New event created', ev)
     // Ensure the return value matches the expected shape
+    // events?.push(ev) // Add the new event to the existing events array
+    // setMainEvent(ev)
+    // Optionally, you can also refresh the events list from the database
+    fetchEvents()  
     return {
       name: ev?.name,
+      created_at: new Date().toISOString(),
       date: ev?.date,
       start_time: ev?.start_time,
       end_time: ev?.end_time,

@@ -11,6 +11,11 @@ import {
 // Icons
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
 
+const formatNotes = (notes: string) => {
+  // Convert new lines to <br> for HTML display
+  return notes.replace(/\n/g, '<br>');
+}
+
 const DisplayEvent = ({ event }: { event: any }) => {
 
 
@@ -61,7 +66,7 @@ const DisplayEvent = ({ event }: { event: any }) => {
             <div className="col-12 d-flex flex-row align-items-center">
               <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
               <p className='mt-2'>
-                {event?.venue?.notes || 'No additional notes provided.'}
+                {formatNotes(event?.venue?.notes) || 'No additional notes provided.'}
               </p>
             </div>
           </div>

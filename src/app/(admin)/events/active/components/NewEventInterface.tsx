@@ -31,6 +31,7 @@ import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 import { useCustomers } from '@/context/useCustomersContext'
   // Venues
 import { useEvents } from '@/context/useEventsContext'
+import { error } from 'console'
 
 interface NewEventInterfaceProps {
   onNewEvent: (event: any) => {
@@ -43,6 +44,7 @@ interface NewEventInterfaceProps {
     menu?: number;
     notes?: string;
     status?: string;
+    created_at?: string;
   }
   
 }
@@ -90,53 +92,55 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     clear_venue()
   }
 
-  let progress = [
-    {
-        "label": "Venue",
-        "status": "confirmed",
-        "date": null
-    },
-    {
-        "label": "Tasting",
-        "status": "in_progress",
-        "date": null
-    },
-    {
-        "label": "Menu",
-        "status": null,
-        "date": null
-    },
-    {
-        "label": "Quote",
-        "status": null,
-        "date": null
-    },
-    {
-        "label": "Contract",
-        "status": null,
-        "date": null
-    },
-    {
-        "label": "Invites",
-        "status": null,
-        "date": null
-    },
-    {
-        "label": "Ingredients",
-        "status": null,
-        "date": null
-    },
-    {
-        "label": "Production",
-        "status": null,
-        "date": null
-    },
-    {
-        "label": "Delivery",
-        "status": null,
-        "date": null
-    }
-  ]
+  let progress = {
+    data: [
+      {
+          "label": "Venue",
+          "status": "confirmed",
+          "date": new Date().toISOString()
+      },
+      {
+          "label": "Tasting",
+          "status": null,
+          "date": null
+      },
+      {
+          "label": "Menu",
+          "status": null,
+          "date": null
+      },
+      {
+          "label": "Quote",
+          "status": null,
+          "date": null
+      },
+      {
+          "label": "Contract",
+          "status": null,
+          "date": null
+      },
+      {
+          "label": "Invites",
+          "status": null,
+          "date": null
+      },
+      {
+          "label": "Ingredients",
+          "status": null,
+          "date": null
+      },
+      {
+          "label": "Production",
+          "status": null,
+          "date": null
+      },
+      {
+          "label": "Delivery",
+          "status": null,
+          "date": null
+      }
+    ]
+  }
   const [ newEvent, setNewEvent ] = useState<Event>({
     active: true,
     created_at: '',
@@ -407,7 +411,6 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     }))
   }
 
-
     // Venue
   const clear_venue = () => {
     setNewEvent((prev) => ({
@@ -431,7 +434,6 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       }
     }))
   }
-
   type FileWithUrl = {
     name: string;
     url: string;
@@ -524,9 +526,9 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     
   }
 
-
    // Event
   let newEventStatus = ''
+  let newEventError = ''
   const [validating, setValidating] = useState(false)
   const toggleValidating = () => {
     setValidating(!validating)
@@ -557,6 +559,8 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           if(newVenue) { await addNewVenue() }
           await onNewEvent(newEventObj)
 
+          newEventStatus = 'Creating new event...'
+
           // send to DB
           console.log('Submitting new event:', newEventObj)
           // send to backend
@@ -566,10 +570,16 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(newEventObj)
-          }).then((res_data) => {
+          }).then(async (res_data) => {
             console.log('Event created, sent to local API endpoint:', res_data)
+            newEventStatus = 'Event created successfully.'
+            await onNewEvent(newEventObj)
+            toggleModal()
+          }).catch((error) => {
+            console.error('Error creating event:', error)
+            newEventError = `Error creating event: ${error}`
           })
-          
+
         }
         else {
           
@@ -582,7 +592,12 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
             body: JSON.stringify(newEventObj)
           }).then(async (res_data) => {
             await onNewEvent(newEventObj)
+            await toggleModal()
+            newEventStatus = 'Event created successfully!'
             console.log('Event created, sent to local API endpoint:', res_data)
+          }).catch((error) => {
+            console.error('Error creating event:', error)
+            newEventError = `Error creating event: ${error}`
           })
         }
     }
@@ -989,6 +1004,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           <Row>
             <Col md={6} className='d-flex flex-row justify-content-end align-items-center'>
               <p className="text-success text-align-right mt-4 mb-0">{ newEventStatus }</p>
+              { newEventError && <p className="text-danger text-align-right mt-4 mb-0">{ newEventError }</p> }
             </Col>
             <Col md={6}>
               <button className="btn btn-primary btn-md mt-4 w-100" onClick={submitNewEvent}>Save event</button>

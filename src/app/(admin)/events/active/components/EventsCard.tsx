@@ -213,6 +213,10 @@ const EventsCard = ({ event }: { event: any }) => {
   const [newNotes, setNewNotes] = useState(event.notes || '')
   const [editNotes, toggleEditNotes] = useState<boolean>(false)
   const toggleNotesEdit = () => { toggleEditNotes(!editNotes) }
+  const formatNotes = (notes: string) => {
+    // Convert new lines to <br> for HTML display
+    return notes.replace(/\n/g, '<br>');
+  }
   const editEventNotes = async () => {
     // console.log('neeewwwww', newNotes)
 
@@ -230,7 +234,7 @@ const EventsCard = ({ event }: { event: any }) => {
 
   return (
     <Col md={3} className='fade-in'>
-      <Card className=" mb-4">
+      <Card className="h-full" style={{ height: '14rem' }}>
         <CardBody>
           <CardTitle className="text-xl font-semibold mb-2">{event.name}</CardTitle>
           {/* <p className="text-muted mb-4">{event?.notes}</p> */}
@@ -426,7 +430,7 @@ const EventsCard = ({ event }: { event: any }) => {
                                   <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
                                 </button>
                               </div>
-                              : <div dangerouslySetInnerHTML={{ __html: newNotes }}></div>
+                              : <div dangerouslySetInnerHTML={{ __html: formatNotes(newNotes) }}></div>
                             }
                             
                           </CardBody>
