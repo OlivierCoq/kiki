@@ -203,7 +203,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       address: '',
       archived: false,
       capacity: 0,
-      country: '',
+      country: 'US',
       city: '',
       contact_email: '',
       contact_name: '',
@@ -228,44 +228,6 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     progress,
     active: true
   }
-
-
-  // handlers/methods
-    // Form helpers
-  // const updateNestedCustomerField = (field: string, value: string) => {
-  //   setNewEvent((prev) => ({
-  //     ...prev,
-  //     customer: {
-  //       ...prev.customer,
-  //       square_data: {
-  //         ...prev.customer.square_data,
-  //         customer: {
-  //           ...prev.customer.square_data.customer,
-  //           address: {
-  //             ...prev.customer.square_data.customer.address,
-  //             [field]: value
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }))
-  // }
-  // // const updateNestedValue = (path: string, value: any) => {
-  // //   setNewEvent(prev =>
-  //     produce(prev, draft => {
-  //       const keys = path.split('.');
-  //       let temp: any = draft;
-  
-  //       for (let i = 0; i < keys.length - 1; i++) {
-  //         const key = keys[i];
-  //         if (!temp[key]) temp[key] = {};
-  //         temp = temp[key];
-  //       }
-  
-  //       temp[keys[keys.length - 1]] = value;
-  //     })
-  //   );
-  // };
 
     // Customer
   const updateCustomer = (customer: any) => {
@@ -337,12 +299,6 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         body: JSON.stringify({
           customer: newCustomerObj
         })
-      }).then((res) => {
-        if (!res.ok) {
-          // throw new Error('Failed to add new customer', res)
-          console.error('Failed to add new customer:', res)
-        }
-        return res.json()
       }).then(async (data) => {
         console.log('New customer added:', data)
           // Reset the newCustomer state
@@ -366,7 +322,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           // setNewEvent({ ...newEvent, customer: target_customer })
           updateNestedValue('customer', target_customer, setNewEvent)
 
-    
+          newEventObj.customer = target_customer?.id
         
       }).catch((error) => {
         console.error('Error adding new customer:', error)
@@ -420,7 +376,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         address: '',
         archived: false,
         capacity: 0,
-        country: '',
+        country: 'US',
         city: '',
         contact_email: '',
         contact_name: '',
@@ -501,9 +457,10 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       !newEvent.venue.address || 
       !newEvent.venue.city || 
       !newEvent.venue.state || 
+      !newEvent.venue.country || 
       !newEvent.venue.zip) {
-    console.log('Please fill in all required fields.')
-    return
+    console.log('Please fill in all required fields for new venues', newEvent.venue)
+    return false
   }
   else {
     console.log('Creating new venue in db...')
@@ -517,6 +474,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       })
       const data = await res.json()
       console.log('new venue created', data)
+      newEventObj.venue = data?.venue?.id
       if (data?.venue) {
         await venues?.push(data?.venue)
       }
@@ -532,6 +490,88 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
   const [validating, setValidating] = useState(false)
   const toggleValidating = () => {
     setValidating(!validating)
+  }
+  const clearNewEventState = () => { 
+
+    setValidating(false)
+    setNewVenue(false)
+    setNewCustomer(false)
+
+    setNewEvent({
+      active: true,
+      created_at: '',
+      customer: {
+        created_at: '',
+        email: '',
+        id: 1,
+        square_data: {
+          customer: {
+            created_at: '',
+            creationSource: 'THIRD_PARTY',
+            emailAddress: '',
+            phoneNumber: '',
+            givenName: '',
+            familyName: '',
+            id: '1',
+            address: {
+              addressLine1: '',
+              addressLine2: '',
+              administrativeDistrictLevel1: '',
+              administrativeDistrictLevel2: '',
+              country: 'US',
+              locality: '',
+              postalCode: ''
+            },
+            preferences: {
+              emailUnsubscribed: false
+            },
+            updatedAt: ''
+          }
+        },
+        user: ''
+      },
+      date: '',
+      end_time: '',
+      id: 1,
+      menu: {
+        id: 1,
+        archived: false,
+        created_at: new Date().toISOString(),
+        description: '',
+        dishes: [] as string[],
+        is_public: true,
+        name: '',
+        packages: {
+          data: [] as number[]
+        },
+        price_per_person: 0,
+        tags: [] as string[]
+      },
+      name: '',
+      notes: '',
+      progress: {
+        data: [] as ProgressEventStep[]
+      },
+      start_time: '',
+      status: '',
+      venue: {
+        id: 1,
+        address: '',
+        archived: false,
+        capacity: 0,
+        country: 'US',
+        city: '',
+        contact_email: '',
+        contact_name: '',
+        contact_number: '',
+        images: [] as VenueImage[] | null,
+        name: '',
+        notes: '',
+        tags: [] as string[] | null,
+        zip: '',
+        state: 'TN'
+      } as Venue
+    })  
   }
   const submitNewEvent = async () => {
 
@@ -557,7 +597,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         if(newCustomer || newVenue) {
           if(newCustomer) { await addNewCustomer() }
           if(newVenue) { await addNewVenue() }
-          await onNewEvent(newEventObj)
+          
 
           newEventStatus = 'Creating new event...'
 
@@ -574,6 +614,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
             console.log('Event created, sent to local API endpoint:', res_data)
             newEventStatus = 'Event created successfully.'
             await onNewEvent(newEventObj)
+            clearNewEventState()
             toggleModal()
           }).catch((error) => {
             console.error('Error creating event:', error)
@@ -595,6 +636,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
             await toggleModal()
             newEventStatus = 'Event created successfully!'
             console.log('Event created, sent to local API endpoint:', res_data)
+            clearNewEventState()
           }).catch((error) => {
             console.error('Error creating event:', error)
             newEventError = `Error creating event: ${error}`
@@ -602,6 +644,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         }
     }
   }
+
 
   return (
     <Col md={2} >
@@ -785,14 +828,14 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                         </div>
                         <div className="w-full d-flex flex-row align-items-start justify-content-start">
                           <Col>
-                          <input type="text" 
-                            placeholder='Zip/Postal'
-                            style={{width: '7rem'}}
+                            <input type="text" 
+                              placeholder='Zip/Postal'
+                              style={{width: '7rem'}}
                             className='form-control ms-2 me-1' defaultValue={ newEvent?.customer?.square_data?.customer?.address?.postalCode || ''} 
                             onChange={(e) => { updateNestedValue('customer.square_data.customer.address.postalCode', e.target.value, setNewEvent) }}/>
                             { validating && newCustomer && !newEvent.customer?.square_data?.customer?.address.postalCode.length && <small className="text-danger">Please enter a zip/postal code.</small> }
                             </Col>
-                          <select 
+                          <Col><select 
                             className='form-select ms-2' 
                             style={{width: '6rem'}}
                             defaultValue={ newEvent?.customer?.square_data?.customer?.address?.country || ''} 
@@ -801,6 +844,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                               <option key={index} value={country.code}>{country.code}</option>
                             ))}
                           </select>
+                        </Col>
                         </div>
                         {/* submit button: */}
                         { !customerValidStatus &&
@@ -877,7 +921,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                         <input type="text" className="form-control" placeholder='Street' value={newEvent.venue.address} onChange={(e) =>  updateNestedValue('venue.address', e.target.value, setNewEvent)} />
                         { validating && newVenue && !newEvent.venue.address.length && <small className="text-danger mb-1">Please enter an venue address.</small> }
                       </Row>
-                      <Row>
+                      <Row className='mb-1'>
                         <Col className='mx-0 px-0'>
                           <input type="text" className="form-control" placeholder='City' value={newEvent.venue.city} onChange={(e) =>  updateNestedValue('venue.city', e.target.value, setNewEvent)} />
                           { validating && newVenue && !newEvent.venue.city.length && <small className="text-danger mb-1">Please enter an venue city.</small> }
@@ -895,6 +939,18 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                         <Col className='mx-0 px-0'>
                           <input type="text" className="form-control" placeholder='Zip/Postal' value={newEvent.venue.zip} onChange={(e) =>  updateNestedValue('venue.zip', e.target.value, setNewEvent)}/>
                           { validating && newVenue && !newEvent.venue.zip.length && <small className="text-danger mb-1">Please enter an venue zip or postal code.</small> }
+                        </Col>
+                      </Row>
+                      <Row className='mb-1'>
+                        <Col className='mx-0 px-0'>
+                          <select id="country" name="country" className="form-control mx-0" required
+                              value={newEvent.venue.country} onChange={(e) =>  updateNestedValue('venue.country', e.target.value, setNewEvent)} >
+                              {worldCountries.map((country: any) => (
+                                <option key={country.code} value={country.code}>
+                                  {country.name}  
+                                </option>    
+                              ))}
+                            </select>
                         </Col>
                       </Row>
                     </Col>

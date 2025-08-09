@@ -20,6 +20,7 @@ import ChoicesFormInput from '@/components/form/ChoicesFormInput'
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 import { USStates } from '@/assets/data/us-states'
 import { worldCountries } from '@/assets/data/world-countries'
+import formatText from '@/helpers/FormatText'
 
 
 const ProgressVenue = ({ event }: { event: Event }) => {
@@ -30,12 +31,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
   const [newEvent, setNewEvent] = useState<Event | null>(null)
   const [newVenue, setNewVenue] = useState<Venue | null>(null)
 
-  // UI
-  const formatNotes = (notes: string) => {
-    // Convert new lines to <br> for HTML display
-    return notes.replace(/\n/g, '<br>');
-  }
-
+  
 
   // Adding new venue to db 
   const [newVenueEntry, setNewVenueEntry] = useState(false)
@@ -306,7 +302,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <div className="row mb-2">
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
-                    <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatNotes(event?.venue?.notes) || 'No additional notes provided.' }}></div>
+                    <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatText(event?.venue?.notes) || 'No additional notes provided.' }}></div>
                   </div>
                 </div>
               </Col>
@@ -372,7 +368,7 @@ const ProgressVenue = ({ event }: { event: Event }) => {
                 <div className="row mb-2">
                   <div className="col-12 d-flex flex-row align-items-center">
                     <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
-                    <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatNotes(event?.venue?.notes) || 'No additional notes provided.' }}></div>
+                    <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatText(event?.venue?.notes) || 'No additional notes provided.' }}></div>
                   </div>
                 </div>
               </Col>

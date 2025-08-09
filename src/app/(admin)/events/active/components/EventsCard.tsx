@@ -23,6 +23,9 @@ import {
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
+// UI 
+import formatText from '@/helpers/FormatText'
+
 // Progress
 import ProgressVenue from '../components/progress/venue'
 import ProgressTasting from '../components/progress/tasting'
@@ -213,10 +216,6 @@ const EventsCard = ({ event }: { event: any }) => {
   const [newNotes, setNewNotes] = useState(event.notes || '')
   const [editNotes, toggleEditNotes] = useState<boolean>(false)
   const toggleNotesEdit = () => { toggleEditNotes(!editNotes) }
-  const formatNotes = (notes: string) => {
-    // Convert new lines to <br> for HTML display
-    return notes.replace(/\n/g, '<br>');
-  }
   const editEventNotes = async () => {
     // console.log('neeewwwww', newNotes)
 
@@ -430,7 +429,7 @@ const EventsCard = ({ event }: { event: any }) => {
                                   <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
                                 </button>
                               </div>
-                              : <div dangerouslySetInnerHTML={{ __html: formatNotes(newNotes) }}></div>
+                              : <div dangerouslySetInnerHTML={{ __html: formatText(newNotes) }}></div>
                             }
                             
                           </CardBody>
