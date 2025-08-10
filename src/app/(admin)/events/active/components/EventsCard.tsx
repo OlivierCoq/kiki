@@ -38,8 +38,13 @@ import ProgressProduction from '../components/progress/production'
 import ProgressDelivery from '../components/progress/delivery'
 
 
+// Add both onDelete and event props:
 
-const EventsCard = ({ event }: { event: any }) => {
+export interface EventsCardProps {
+  event: any;
+  onDelete: () => void; // Callback function to handle deletion
+}
+const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
 
   // Modal toggle
   const { isTrue, toggle } = useToggle()
@@ -517,7 +522,7 @@ const EventsCard = ({ event }: { event: any }) => {
                 </p>
                 <div>
                   <Link href="" className="btn btn-primary">
-                    Generate slip
+                    Deliver
                   </Link>
                 </div>
               </div>
@@ -544,7 +549,20 @@ const EventsCard = ({ event }: { event: any }) => {
               <Button variant="danger" onClick={() => {
                 // Handle delete logic here
                 console.log('Deleting event:', event.id)
-                toggleDelete()
+                fetch('/api/events/delete', {
+                  method: 'DELETE',
+                  body: JSON.stringify({ id: event.id }),
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                }).then(() => {
+                  // Optionally, you can add a callback to refresh the events list in the parent component
+                  if (onDelete) onDelete() // Call the onDelete prop to notify parent
+                  console.log('Event deleted successfully')
+                  toggleDelete()
+                }).catch((error) => {
+                  console.error('Error deleting event:', error)
+                })
               }}>
                 Delete
               </Button>

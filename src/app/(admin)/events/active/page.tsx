@@ -70,6 +70,13 @@ const ActiveEventsPage = () => {
     }
   }
 
+  const handleDeleteEvent = () => {
+    fetchEvents().then(() => {
+      console.log('Events list refreshed after deletion')
+    }).catch((error:any) => {
+      console.error('Error refreshing events list:', error)
+    })
+  }
 
   return (
     <Row>
@@ -81,7 +88,7 @@ const ActiveEventsPage = () => {
       <Col md={12}>
         <Row>
         {(events?.length > 0) && !loading ? (
-            events?.map((event: Event) => event.active && ( <EventsCard key={event.id} event={event} /> ))
+            events?.map((event: Event) => event.active && ( <EventsCard key={event.id} event={event} onDelete={handleDeleteEvent} /> ))
           ) : (
             <Col>
               <p>{ loading ? 'Loading ...' : 'No active events found.' }</p>
