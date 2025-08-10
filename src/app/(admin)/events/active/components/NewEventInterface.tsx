@@ -278,7 +278,6 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       // Create new customer object
       const newCustomerObj = {
         ...newEvent.customer.square_data.customer,
-        id: Date.now().toString(), // Temporary ID, replace with actual ID from backend
         created_at: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         address: {
@@ -289,9 +288,11 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
 
 
       // send to backend
-      await setLoading(true)
+       setLoading(true)
       newEventStatus += ' Adding new customer...'
-      await fetch('/api/customers/add', {
+
+      try {
+        const response = await fetch('/api/customers/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -299,35 +300,40 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         body: JSON.stringify({
           customer: newCustomerObj
         })
-      }).then(async (data) => {
-        console.log('New customer added:', data)
-          // Reset the newCustomer state
-          // Update the newEvent state with the new customer ID
-          setPostingNewCustomer(false)
-          await customers.push(data?.customer) // Assuming data contains the new customer object
-          
-        let target_customer = customers.find((customer: any) => customer.id === data?.customer?.id)
-
-          console.log('Target customer found:', target_customer)
-        // Update the newEventObj with the new customer ID
-          console.log('Updating newEventObj with new customer ID:', data?.customer?.id)
-          console.log('new id:', data?.customer?.id)
-
-          await fetchCustomers() // Refresh the customers list
-          await setLoading(false) // Set loading to false after adding the customer
-
-
-          
-          updateCustomer(target_customer)
-          // setNewEvent({ ...newEvent, customer: target_customer })
-          updateNestedValue('customer', target_customer, setNewEvent)
-
-          newEventObj.customer = target_customer?.id
-        
-      }).catch((error) => {
-        console.error('Error adding new customer:', error)
       })
+        const data = await response.json()
+        setPostingNewCustomer(false)
+        customers.push(data?.customer)
+        console.log('New customer added:', data)
 
+        let target_customer = customers.find((customer: any) => {
+          return customer?.id === data?.customer?.id
+        })
+
+        // console.log('Target customer found:', target_customer)
+      // Update the newEventObj with the new customer ID
+        // console.log('Updating newEventObj with new customer ID:', data?.customer?.id)
+        // console.log('new id:', data?.customer?.id)
+
+        await fetchCustomers() // Refresh the customers list
+        await setLoading(false)
+
+        updateCustomer(target_customer)
+        // setNewEvent({ ...newEvent, customer: target_customer })
+        updateNestedValue('customer', target_customer, setNewEvent)
+
+        newEventObj.customer = target_customer?.id
+
+
+        return data?.customer
+      } catch (error) {
+        console.error('Error creating new customer:', error)
+        throw error
+      } finally {
+        setPostingNewCustomer(false)
+        setLoading(false)
+      }
+      
       
     }
   }
@@ -459,27 +465,36 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       !newEvent.venue.state || 
       !newEvent.venue.country || 
       !newEvent.venue.zip) {
-    console.log('Please fill in all required fields for new venues', newEvent.venue)
+    // console.log('Please fill in all required fields for new venues', newEvent.venue)
     return false
   }
   else {
     console.log('Creating new venue in db...')
     newEventStatus += ' Adding new venue...'
-    const res = await fetch('/api/venues/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newEvent.venue)
-      })
-      const data = await res.json()
-      console.log('new venue created', data)
-      newEventObj.venue = data?.venue?.id
-      if (data?.venue) {
-        await venues?.push(data?.venue)
+
+      try {
+        const res = await fetch('/api/venues/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newEvent.venue)
+        })
+        const data = await res.json()
+        // console.log('new venue created', data)
+        newEventObj.venue = data?.venue?.id
+        if (data?.venue) {
+          await venues?.push(data?.venue)
+        }
+        return data?.venue
+      } catch (error) {
+        console.error('Error creating new venue:', error)
+        newEventStatus += ' Error creating new venue.'
+        throw error
+      } finally {
+        setLoading(false)
+        // setAddingNewVenue(false)
       }
-      // setAddingNewVenue(false)
-     
     } 
     
   }
@@ -587,13 +602,13 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       newEventObj?.menu === null 
 
     if(invalid) {
-      console.log('Fix ur shit: ', newEventObj)
+      // console.log('Fix ur shit: ', newEventObj)
       
       toggleValidating()
       return 
     } else {
         toggleValidating()
-        console.log('sending to backend: ', newEventObj)
+        // console.log('sending to backend: ', newEventObj)
         if(newCustomer || newVenue) {
           if(newCustomer) { await addNewCustomer() }
           if(newVenue) { await addNewVenue() }

@@ -111,7 +111,7 @@ export async function POST(req: Request) {
           }
           console.log('Customer added to database:', data);
           response_obj = await data[0];
-          return NextResponse.json({ message: 'Customer added successfully', customer: data }, { status: 201 });
+          return NextResponse.json({ message: 'Customer added successfully', customer: response_obj }, { status: 201 });
         
       }).catch((error) => {
         console.error('Error creating Square customer:', error);

@@ -312,8 +312,8 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                   </div>
                                   <div className="col-12 d-flex flex-row align-items-center mb-2">
                                     <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
-                                    <a href={`tel:${customer?.address?.phoneNumber}`}>
-                                      {customer?.address?.phoneNumber}
+                                    <a href={`tel:${customer?.phoneNumber}`}>
+                                      {customer?.phoneNumber}
                                     </a>
                                   </div>
                                   <div className="col-12 d-flex flex-row">
@@ -337,9 +337,16 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                   <Col>
                                     <div className="d-flex flex-row align-items-center mb-1">
                                       <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
-                                      <input type="text" 
-                                        className='form-control' value={ customer?.givenName || ''} 
-                                        onChange={(e) => updateCustomer({ ...customer, givenName: e.target.value }) } />
+                                      <Col>
+                                        <input type="text" 
+                                          className='form-control' value={ customer?.givenName || ''} 
+                                          onChange={(e) => updateCustomer({ ...customer, givenName: e.target.value }) } />
+                                      </Col>
+                                      <Col>
+                                        <input type="text" 
+                                          className='form-control' value={ customer?.familyName || ''} 
+                                          onChange={(e) => updateCustomer({ ...customer, familyName: e.target.value }) } />
+                                      </Col>
                                     </div>
                                     <div className="d-flex flex-row align-items-center mb-1">
                                       <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
@@ -350,8 +357,8 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                     <div className="d-flex flex-row align-items-center mb-1">
                                       <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
                                       <input type="text" 
-                                        className='form-control' value={ customer?.address?.phoneNumber || ''} 
-                                        onChange={(e) => updateNestedField('phoneNumber', e.target.value) } />
+                                        className='form-control' value={ customer?.phoneNumber || ''} 
+                                        onChange={(e) => updateCustomer({ ...customer, phoneNumber: e.target.value }) } />
                                     </div>
                                     <div className="d-flex flex-row align-items-center mb-1">
                                       <IconifyIcon icon="bx-map" fontSize='20' className="me-2" />
