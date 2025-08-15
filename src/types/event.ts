@@ -27,6 +27,17 @@ export type ProgressEventStep = {
   status: string
 }
 
+export type Summary = {
+  production: {
+    total_guests: number
+    price_per_person: number
+    items: string[]
+  }
+  total_revenue: number
+  total_cost: number
+  total_profit: number
+}
+
 export type Event = {
   active: boolean
   created_at: string
@@ -83,6 +94,7 @@ export type Event = {
   progress: {
     data: ProgressEventStep[]
   }
+  summary: Summary
   start_time: string
   status: string
   venue: Venue

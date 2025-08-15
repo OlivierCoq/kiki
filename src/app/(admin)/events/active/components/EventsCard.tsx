@@ -38,6 +38,7 @@ import ProgressProduction from '../components/progress/production'
 import ProgressDelivery from '../components/progress/delivery'
 
 
+
 // Add both onDelete and event props:
 
 export interface EventsCardProps {
@@ -45,6 +46,7 @@ export interface EventsCardProps {
   onDelete: () => void; // Callback function to handle deletion
 }
 const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
+
 
   // Modal toggle
   const { isTrue, toggle } = useToggle()
@@ -73,7 +75,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
   // Progress
   const [progress_obj, set_progress_obj] = useState({
     venue: true,
-    tasting: false,
+    // tasting: false,
     menu: false,
     quote: false,
     contract: false,
@@ -454,7 +456,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                       <Col md={4} className='h-auto'>
                         <Card className='bg-light h-100'>
                           <CardBody>
-                            <CardTitle className="text-lg font-semibold mb-2">Order Summary</CardTitle>
+                            <CardTitle className="text-lg font-semibold mb-2">Summary</CardTitle>
                           </CardBody>
                           <CardFooter>
 
@@ -489,9 +491,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                         { progress_obj?.venue && (
                           <ProgressVenue event={event} />
                         )}
-                        { progress_obj?.tasting && (
-                          <ProgressTasting event={event} />
-                        )}
+      
                         { progress_obj?.menu && (
                           <ProgressMenu event={event} />
                         )}

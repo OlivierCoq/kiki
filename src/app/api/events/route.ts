@@ -93,12 +93,43 @@ export async function GET() {
         }
       }
 
+      const get_dish_data = async ( data: any[]) => {
+        // merge event data with dish data from database, dishes table
+        const dishIds = data.map(event => event.menu?.dishes).flat().filter(id => id !== null && id !== undefined)
+        const { data: dishes, error: dishError } = await supabase
+          .from('dishes')
+          .select('*')
+          .in('id', dishIds)
+        if (dishError) {
+          throw dishError
+        } else {
+          // Create a map of dish IDs to dish data (coming up empty. why?)
+          // console.log('Dishes fetched:', dishes)
+          // console.log('Dish IDs:', dishIds)
+          // console.log('Dishes length:', dishes.length)
+          if (!dishes || dishes.length === 0) {
+            console.warn('No dishes found for the provided dish IDs:', dishIds)
+            return
+          }
+          console.log('Fetched dishes:', dishes)
+          const dishMap = new Map(dishes.map(dish => [dish.id, dish]))
+          // console.log('Dish map:', dishMap) 
+          // Merge dish data into event data
+          event_data = event_data?.map(event => ({
+            ...event,
+            menu: {   
+              ...event.menu,
+              dishes: event.menu?.dishes?.map((dishId: number) => dishMap.get(dishId) || null) // Add dish data or null if not found
+            }
+          }))
+          // console.log('Merged event data with dish data:', event_data)
+        }
+      }
+
       await get_customer_data(data)
       await get_venue_data(data)
       await get_menu_data(data)
-
-
-      
+      // await get_dish_data(data)
 
       // console.log('Final event data:', event_data)
       // Return the final event data with merged customer, venue, and menu data

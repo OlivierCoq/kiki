@@ -15,7 +15,7 @@ import Link from 'next/link'
 import updateNestedValue from '@/helpers/NestedFields'
 
 // Types
-import { Event, Venue, ProgressEventStep, VenueImage } from '@/types/event'
+import { Event, Venue, ProgressEventStep, VenueImage, Summary } from '@/types/event'
 
 
 // UI
@@ -100,11 +100,6 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           "date": new Date().toISOString()
       },
       {
-          "label": "Tasting",
-          "status": null,
-          "date": null
-      },
-      {
           "label": "Menu",
           "status": null,
           "date": null
@@ -141,6 +136,18 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       }
     ]
   }
+
+  const summary = {
+    "production": {
+      "total_guests": 0,
+      "price_per_person": 0,
+      "items": []
+    },
+    "total_cost": 0,
+    "total_revenue": 0,
+    "total_profit": 0
+  }
+
   const [ newEvent, setNewEvent ] = useState<Event>({
     active: true,
     created_at: '',
@@ -174,6 +181,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       },
       user: ''
     },
+
     date: '',
     end_time: '',
     id: 1,
@@ -214,7 +222,8 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       tags: [] as string[] | null,
       zip: '',
       state: 'TN'
-    } as Venue
+    } as Venue,
+    summary: summary
   })
   let newEventObj = {
     name: newEvent?.name,
@@ -226,6 +235,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     venue: newEvent?.venue?.id,
     notes: newEvent?.notes,
     progress,
+    summary,
     active: true
   }
 
@@ -585,8 +595,18 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         tags: [] as string[] | null,
         zip: '',
         state: 'TN'
-      } as Venue
-    })  
+      } as Venue,
+     summary: {
+        "production": {
+          "total_guests": 0,
+          "price_per_person": 0,
+          "items": []
+        },
+        "total_cost": 0,
+        "total_revenue": 0,
+        "total_profit": 0
+      } as Summary
+    })
   }
   const submitNewEvent = async () => {
 
