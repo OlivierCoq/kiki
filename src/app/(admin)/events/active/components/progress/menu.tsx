@@ -12,15 +12,25 @@ import {
   Card
 } from 'react-bootstrap'
 
+// Types
+import { Dish } from '@/types/event'
 
 
-const ProgressMenu = ({ event }: { event: any }) => {
+export interface EventMenuProps {
+  event: any;
+  onUpdate: () => void; // Callback function to handle update
+}
+const EventsCard = ({ event, onUpdate = () => {} }: EventMenuProps) => {
+
+
 
   console.log('Edit Menu here...', event?.menu ? event.menu : null)
 
   // Fetch menu from /api/menus/[id] endpoint
   const [menu, setMenu] = useState<any>(null)   
-  const [dishes, setDishes] = useState<{ id: string | number; name: string }[]>([])
+  const [dishes, setDishes] = useState<Dish[]>([])
+  const [loading, setLoading] = useState(true)
+
 
   useEffect(() => {
     if (event?.menu) {
@@ -31,10 +41,12 @@ const ProgressMenu = ({ event }: { event: any }) => {
             console.log('Fetched menu data:', data)
             setMenu(data?.menu || null)
             setDishes(data?.dishes || [])
+            setLoading(false)
           })
           .catch((error) => {
             console.error('Error fetching menu data:', error)
-          })      
+            setLoading(false)
+          })
       } catch (error) {
         console.error('Error in useEffect fetching menu:', error)
       }
@@ -59,12 +71,22 @@ const ProgressMenu = ({ event }: { event: any }) => {
                    {dishes.map((dish) => (
                      <li key={dish.id}>
 
-                        <div className="d-flex flex-row">
-                          <IconifyIcon icon="mdi:food" className="me-2" />
-                          <div className="d-flex flex-column">
-                            <h5 className='mb-1'>{dish.name}</h5>
-                            <p className="text-muted">{dish?.description} </p>
+                        <div className="d-flex flex-row justify-content-between align-items-center">
+
+                          <div className="d-flex flex-row">
+                            <IconifyIcon icon="mdi:food" className="me-2" />
+                            <div className="d-flex flex-column">
+                              <h5 className='mb-1'>{dish.name}</h5>
+                              <p className="text-muted">{dish?.description} </p>
+                            </div>
                           </div>
+
+                          <div>
+
+                          </div>
+                          {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
+                            Edit Dish
+                          </Link> */}
                         </div>
                      </li>
 
@@ -76,12 +98,20 @@ const ProgressMenu = ({ event }: { event: any }) => {
           </Row>
         </div>
       ) : (
-        <div className="text-center">
-          <p>No menu available for this event.</p>
-        </div>
+
+        loading ? (
+          <div className="text-center my-5">
+            {/* Loading animation */}
+            <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
+          </div>
+        ) : (
+          <div className="text-center">
+            <p>No menu found for this event.</p>
+          </div>
+        )
       )}
     </>
   )
 }
 
-export default ProgressMenu
+export default EventsCard

@@ -38,6 +38,18 @@ export type Summary = {
   total_profit: number
 }
 
+export type Dish = {
+  id: number
+  name: string
+  description: string
+  menu: number
+  position: number
+  price: number
+  tags: string[]
+  created_at: string
+  updated_at: string
+}
+
 export type Event = {
   active: boolean
   created_at: string
@@ -79,7 +91,7 @@ export type Event = {
     archived: boolean
     created_at: string
     description: string
-    dishes: string[]
+    dishes: string[] | Dish[] | null
     id: number
     is_public: boolean
     name: string

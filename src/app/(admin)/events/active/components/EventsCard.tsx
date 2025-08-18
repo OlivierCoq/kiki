@@ -25,6 +25,8 @@ import Link from 'next/link'
 
 // UI 
 import formatText from '@/helpers/FormatText'
+import formatCurrency from '@/helpers/FormatCurrency'
+import updateNestedValue from '@/helpers/NestedFields'
 
 // Progress
 import ProgressVenue from '../components/progress/venue'
@@ -196,8 +198,11 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
       }
     }))
   }
+  const [customerPosting, toggleCustomerPosting] = useState<boolean>(false)
+  const toggleCustomer = () => { toggleCustomerPosting(!customerPosting) }
   const editCustomer = async () => {
 
+    await toggleCustomerPosting(true)
     let kiki_customer = event?.customer 
     kiki_customer.square_data = {customer}
 
@@ -213,7 +218,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
 
     const data = await res.json()
     // console.log('resuklt', data)
-
+    await toggleCustomerPosting(false)
 
     // Update square in backend:
     toggleCustomerEdit()
@@ -236,6 +241,61 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
 
     const data = await res.json()
     toggleNotesEdit()
+  }
+
+  // Summary handlers
+  const [summary, setSummary] = useState(event?.summary || {})
+  const [editSummary, toggleEditSummary ] = useState<boolean>(false)
+  const [summaryPosting, toggleSummaryPosting] = useState<boolean>(false)
+  const toggleSummary = () => { toggleSummaryPosting(!summaryPosting) }
+  const toggleSummaryEdit = () => { toggleEditSummary(!editSummary) }
+
+  const update_total_cost = (summary: any) => {
+
+    
+  }
+
+  const editEventSummary = async () => {
+    
+    await toggleSummaryPosting(true)
+
+
+
+    const res = await fetch(`/api/events/${event?.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ summary })
+    })
+
+
+    // Update total cost
+
+    // update revenue
+
+    // update profit
+
+
+    const data = await res.json()
+    console.log('updated event', data)
+    await toggleSummaryPosting(false)
+    toggleSummaryEdit()
+  }
+
+  const updateEventSummary = async (summary: any) => {
+
+    const res = await fetch(`/api/events/${event?.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ summary })
+    })
+
+    const data = await res.json()
+    setSummary(data?.event?.summary)
+    console.log('updated event', data)
   }
 
   return (
@@ -269,7 +329,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                             <p className="mb-0"> Order Details / #{event.id} - { event?.created_at }</p>
 
                           </div>
-                          <div>
+                          {/* <div>
                             <Link href="" className="btn btn-outline-secondary me-1">
                               Refund
                             </Link>
@@ -282,7 +342,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                               Update Event
                             </Link>
                             &nbsp;
-                          </div>
+                          </div> */}
                         </div>
                       </Col>
                     </Row>
@@ -293,7 +353,9 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                           <CardBody>
                             <CardTitle className="text-lg font-semibold mb-2">
                               Customer &nbsp;
-                              <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" onClick={toggleCustomerEdit} />
+                              <a href="#" className="text-primary cursor-hover" onClick={toggleCustomerEdit}>
+                                <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" />
+                              </a>
                             </CardTitle>
 
                             {
@@ -339,7 +401,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                   <Col>
                                     <div className="d-flex flex-row align-items-center mb-1">
                                       <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
-                                      <Col>
+                                      <Col className='me-1'>
                                         <input type="text" 
                                           className='form-control' value={ customer?.givenName || ''} 
                                           onChange={(e) => updateCustomer({ ...customer, givenName: e.target.value }) } />
@@ -374,7 +436,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                           className='form-control ms-2' value={ customer?.address?.addressLine2 || ''} 
                                           onChange={(e) => updateNestedField('addressLine2', e.target.value) } />
                                         <div className="w-full d-flex flex-row align-items-center justify-content-center">
-                                          <input type="text" 
+                                          <input type="text"  
                                             style={{width: '10rem'}}
                                             className='form-control ms-2' value={ customer?.address?.locality || ''} 
                                             onChange={(e) => updateNestedField('locality', e.target.value) } />
@@ -396,9 +458,15 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                       </div>
                                     </div>
                                     <div className="d-flex flex-row  justify-content-end align-items-end">
-                                      <button className='rounded btn' onClick={editCustomer}>
-                                        <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
-                                      </button>
+                                      { 
+                                        customerPosting ? <IconifyIcon fontSize='10' icon="mdi:loading" className="spinner-border text-primary text-sm" />
+                                        :
+
+                                        <button className='rounded btn' onClick={editCustomer}>
+                                          <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
+                                        </button>
+                                      }
+                                      
                                     </div>
                                   </Col>
                                 </Row>
@@ -432,7 +500,9 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                             
                             <div className='d-flex flex-row align-items-center mt-4 mb-1'>
                               <p className='mb-0'>Notes &nbsp;</p>
-                              <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" onClick={toggleNotesEdit} />
+                              <a href="#" className="text-primary cursor-hover" onClick={toggleNotesEdit}>
+                                <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" />
+                              </a>
                             </div>
                             {
                             editNotes ? 
@@ -456,7 +526,95 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                       <Col md={4} className='h-auto'>
                         <Card className='bg-light h-100'>
                           <CardBody>
-                            <CardTitle className="text-lg font-semibold mb-2">Summary</CardTitle>
+                            <CardTitle className="text-lg font-semibold mb-2">
+                              Summary &nbsp;
+                              <a href="#" className="text-primary cursor-hover" onClick={toggleSummaryEdit}>
+                                <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" />
+                              </a>
+                            </CardTitle>
+                            
+                            { !editSummary && 
+                              <div className='fade-in'>
+                                <Row className='mb-3'>
+                                  <Col>
+                                    <h5 className='mb-1'>Total Guests</h5>
+                                    <p className='mb-0'>{ summary?.production?.total_guests }</p>
+                                  </Col>
+                                  <Col>
+                                    <h5 className='mb-1'>Price per Person</h5>
+                                    <p className='mb-0'>{ formatCurrency(summary?.production?.price_per_person) }</p>
+                                  </Col>
+                                </Row>
+                                <Row className='mb-3'>
+                                  <Col>
+                                    <h5 className='mb-1'>Total Cost</h5>
+                                    <p className='mb-0'>{ formatCurrency(summary?.total_cost) }</p>
+                                  </Col>
+                                  <Col>
+                                    <h5 className='mb-1'>Total Revenue</h5>
+                                    <p className='mb-0'>{ formatCurrency(summary?.total_revenue) }</p>
+                                  </Col>
+                                </Row>
+                                <Row className='mb-3'>
+                                  <Col>
+                                    <h5 className='mb-1'>Total Profit</h5>
+                                    <p className='mb-0'>{ formatCurrency(summary?.total_profit) }</p>
+                                  </Col>
+                                </Row>
+                              </div>
+                            }
+
+                            {
+                              editSummary && 
+                              <div>
+                                <Row>
+                                  <Col className='me-1 mb-2 p-0'>
+                                    <label htmlFor="total_guests">Total Guests</label>
+                                    {/* onChange={(e) => { updateNestedValue('start_time', e.target.value, setNewEvent) }} */}
+                                    <input type="number" id="total_guests" className="form-control" defaultValue={summary?.production?.total_guests} 
+                                      onChange={(e) => { updateNestedValue('production.total_guests', e.target.value, setSummary) }}
+                                    />
+                                  </Col>
+                                  <Col className='m-0 p-0'>
+                                    <label htmlFor="price_per_person">Price per Person</label>
+                                    <input type="number" disabled id="price_per_person" className="form-control" defaultValue={summary?.production?.price_per_person} />
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col className='me-1 mb-2 p-0'>
+                                    <label htmlFor="total_cost">Total Cost</label>
+                                    <input type="number" disabled id="total_cost" className="form-control" defaultValue={summary?.total_cost} />
+                                  </Col>
+                                  <Col className='m-0 p-0'>
+                                    <label htmlFor="total_revenue">Total Revenue</label>
+                                    <input type="number" disabled id="total_revenue" className="form-control" defaultValue={summary?.total_revenue} />
+                                  </Col>
+                                </Row>
+                                <Row className='mb-3'>
+                                  <Col md={6}></Col>
+                                  <Col md={6}>
+                                    <div className="d-flex fex-row justify-content-end">
+
+                                      { 
+                                        summaryPosting ? <IconifyIcon fontSize='10' icon="mdi:loading" className="spinner-border text-primary text-sm" />
+                                        :
+
+                                        <button className='rounded btn' onClick={editEventSummary}>
+                                          <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
+                                        </button>
+                                      }
+                                    </div>
+                                  </Col>
+                                </Row>  
+                                <Row className='mb-3'>
+                                  <Col>
+                                    <h5 className='mb-1'>Total Profit</h5>
+                                    <p className='mb-0'>{ formatCurrency(event?.summary?.total_profit) }</p>
+                                  </Col>
+                                </Row>
+                              </div> 
+                            }
+                            
                           </CardBody>
                           <CardFooter>
 

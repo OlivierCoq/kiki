@@ -105,17 +105,17 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           "date": null
       },
       {
+          "label": "Invites",
+          "status": null,
+          "date": null
+      },
+      {
           "label": "Quote",
           "status": null,
           "date": null
       },
       {
           "label": "Contract",
-          "status": null,
-          "date": null
-      },
-      {
-          "label": "Invites",
           "status": null,
           "date": null
       },

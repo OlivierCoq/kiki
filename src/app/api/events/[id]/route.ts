@@ -12,7 +12,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   // const body = { venue: 2 }
 
   // console.log("What we're working with here: ", eventId)
-  // console.log('booody ', body)
+  console.log('booody ', body)
 
   // Optionally validate input
   if (!eventId || !body) {
@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ event: data })
+  return NextResponse.json({ message: 'Event updated successfully', event: data }, {status: 200 })
 
 }
 
