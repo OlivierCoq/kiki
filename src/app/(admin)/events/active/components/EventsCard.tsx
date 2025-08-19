@@ -541,21 +541,20 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                     <p className='mb-0'>{ summary?.production?.total_guests }</p>
                                   </Col>
                                   <Col>
-                                    <h5 className='mb-1'>Price per Person</h5>
-                                    <p className='mb-0'>{ formatCurrency(summary?.production?.price_per_person) }</p>
-                                  </Col>
-                                </Row>
-                                <Row className='mb-3'>
-                                  <Col>
                                     <h5 className='mb-1'>Total Cost</h5>
                                     <p className='mb-0'>{ formatCurrency(summary?.total_cost) }</p>
                                   </Col>
+                                  {/* <Col>
+                                    <h5 className='mb-1'>Price per Person</h5>
+                                    <p className='mb-0'>{ formatCurrency(summary?.production?.price_per_person) }</p>
+                                  </Col> */}
+                                </Row>
+                                <Row className='mb-3'>
+                                  
                                   <Col>
                                     <h5 className='mb-1'>Total Revenue</h5>
                                     <p className='mb-0'>{ formatCurrency(summary?.total_revenue) }</p>
                                   </Col>
-                                </Row>
-                                <Row className='mb-3'>
                                   <Col>
                                     <h5 className='mb-1'>Total Profit</h5>
                                     <p className='mb-0'>{ formatCurrency(summary?.total_profit) }</p>
@@ -651,7 +650,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                         )}
       
                         { progress_obj?.menu && (
-                          <ProgressMenu event={event} />
+                          <ProgressMenu event={event} onUpdate={updateEventSummary} />
                         )}
                         { progress_obj?.quote && (
                           <ProgressQuote event={event} />

@@ -46,6 +46,7 @@ export type Dish = {
   position: number
   price: number
   tags: string[]
+  quantity: number
   created_at: string
   updated_at: string
 }

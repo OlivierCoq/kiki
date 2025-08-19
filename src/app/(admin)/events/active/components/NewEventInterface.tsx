@@ -15,7 +15,7 @@ import Link from 'next/link'
 import updateNestedValue from '@/helpers/NestedFields'
 
 // Types
-import { Event, Venue, ProgressEventStep, VenueImage, Summary } from '@/types/event'
+import { Event, Venue, ProgressEventStep, VenueImage, Summary, Dish } from '@/types/event'
 
 
 // UI
@@ -190,7 +190,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       archived: false,
       created_at: new Date().toISOString(),
       description: '',
-      dishes: [] as string[],
+      dishes: [] as Dish[],
       is_public: true,
       name: '',
       packages: {

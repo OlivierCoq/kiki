@@ -1,7 +1,7 @@
 // Format Currency Helper
 const formatCurrency = (amount: number) => {
   if (typeof amount !== 'number') {
-    console.error('Invalid amount for currency formatting:', amount);
+    // console.error('Invalid amount for currency formatting:', amount);
     return '';
   }
   

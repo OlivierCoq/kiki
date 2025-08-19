@@ -15,13 +15,14 @@ import {
 // Types
 import { Dish } from '@/types/event'
 
+// Helpers
+import updateNestedValue from '@/helpers/NestedFields'
 
-export interface EventMenuProps {
+interface EventMenuProps {
   event: any;
-  onUpdate: () => void; // Callback function to handle update
+  onUpdate: (summary: any) => void | Promise<void>; // Callback function to handle update
 }
-const EventsCard = ({ event, onUpdate = () => {} }: EventMenuProps) => {
-
+const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
 
 
   console.log('Edit Menu here...', event?.menu ? event.menu : null)
@@ -30,18 +31,71 @@ const EventsCard = ({ event, onUpdate = () => {} }: EventMenuProps) => {
   const [menu, setMenu] = useState<any>(null)   
   const [dishes, setDishes] = useState<Dish[]>([])
   const [loading, setLoading] = useState(true)
+  const [summary, setSummary] = useState<any>(event.summary ? event.summary : null)
 
+  const update_summary = async () => {
+    onUpdate(summary)
+  }
+
+  const update_quantity = async () => {
+    
+    update_summary()
+  }
+
+
+  useEffect(() => {
+    console.log('summary updated:', summary);
+    update_summary()
+  }, [summary]);
 
   useEffect(() => {
     if (event?.menu) {
       try {
         fetch(`/api/menus/${event.menu.id}`)
           .then((res) => res.json())
-          .then((data) => {
+          .then(async (data) => {
             console.log('Fetched menu data:', data)
             setMenu(data?.menu || null)
-            setDishes(data?.dishes || [])
-            setLoading(false)
+            await setDishes(data?.dishes)
+
+            /*
+
+              {
+                "production": {
+                "total_guests": 0,
+                "price_per_person": 0,
+                "items": []
+                },
+                "total_cost": 0,
+                "total_revenue": 0,
+                "total_profit": 0
+                }
+
+
+              if (data?.venue_img_files?.length) {
+                      updateNestedValue('venue.images', [...(newEvent.venue.images ?? []), ...data.venue_img_files], setNewEvent)
+                      setStatus('Images uploaded successfully.')
+                    } 
+
+            */
+           if(!summary.production.items.length) {
+            // console.log('dishes empty: ', summary.production.items)
+            if(data.dishes.length) {
+              // console.log('dishes full', data?.dishes)
+              // await updateNestedValue('production.items', data?.dishes, setSummary)
+              updateNestedValue('production.items', data?.dishes, setSummary)
+              setLoading(false)
+            }
+             
+           }
+            // await setSummary(async(prev: any) => ({
+            //     ...prev,
+            //     production: {
+            //       ...prev.production,
+            //       items: prev?.production?.items?.length ? [...prev.production.items] : await data?.dishes 
+            //     }
+            //   }))
+            
           })
           .catch((error) => {
             console.error('Error fetching menu data:', error)
@@ -71,9 +125,9 @@ const EventsCard = ({ event, onUpdate = () => {} }: EventMenuProps) => {
                    {dishes.map((dish) => (
                      <li key={dish.id}>
 
-                        <div className="d-flex flex-row justify-content-between align-items-center">
+                        <div className="d-flex flex-row justify-content-between align-items-center mb-4">
 
-                          <div className="d-flex flex-row">
+                          <div className="d-flex flex-row w-75 w-sm-100">
                             <IconifyIcon icon="mdi:food" className="me-2" />
                             <div className="d-flex flex-column">
                               <h5 className='mb-1'>{dish.name}</h5>
@@ -81,8 +135,9 @@ const EventsCard = ({ event, onUpdate = () => {} }: EventMenuProps) => {
                             </div>
                           </div>
 
-                          <div>
-
+                          <div className=''>
+                            {/* Number */}
+                            <input type='number' className='form-control' onChange={update_quantity} defaultValue={dish.quantity} />
                           </div>
                           {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
                             Edit Dish
@@ -114,4 +169,4 @@ const EventsCard = ({ event, onUpdate = () => {} }: EventMenuProps) => {
   )
 }
 
-export default EventsCard
+export default ProgressMenu
