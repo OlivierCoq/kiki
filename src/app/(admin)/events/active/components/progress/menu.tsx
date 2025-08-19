@@ -13,7 +13,7 @@ import {
 } from 'react-bootstrap'
 
 // Types
-import { Dish } from '@/types/event'
+import { Dish, Summary } from '@/types/event'
 
 // Helpers
 import updateNestedValue from '@/helpers/NestedFields'
@@ -31,23 +31,41 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
   const [menu, setMenu] = useState<any>(null)   
   const [dishes, setDishes] = useState<Dish[]>([])
   const [loading, setLoading] = useState(true)
-  const [summary, setSummary] = useState<any>(event.summary ? event.summary : null)
+  const [summary, setSummary] = useState<Summary>(event.summary ? event.summary : null)
 
   const update_summary = async () => {
     onUpdate(summary)
   }
 
-  const update_quantity = async () => {
-    
-    update_summary()
+  const update_quantity = (dish: Dish, dishId: number, newQuantity: number) => {
+    setSummary((prev: Summary) => {
+      const newItems = prev.production.items.map((item: any) =>
+        item.id === dishId ? { ...item, quantity: newQuantity } : item
+      );
+      // Calculate new total_cost based on all items' quantity * cost
+      const newTotalCost = newItems.reduce(
+        (sum: number, item: any) => sum + (item.quantity * item.cost),
+        0
+      );
+      return {
+        ...prev,
+        total_cost: newTotalCost,
+        production: {
+          ...prev.production,
+          items: newItems,
+        },
+      };
+    });
   }
 
 
+  // Detect changes to Summary and send up component line, then to db:
   useEffect(() => {
     console.log('summary updated:', summary);
     update_summary()
   }, [summary]);
 
+  // Load data 
   useEffect(() => {
     if (event?.menu) {
       try {
@@ -88,13 +106,7 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
             }
              
            }
-            // await setSummary(async(prev: any) => ({
-            //     ...prev,
-            //     production: {
-            //       ...prev.production,
-            //       items: prev?.production?.items?.length ? [...prev.production.items] : await data?.dishes 
-            //     }
-            //   }))
+
             
           })
           .catch((error) => {
@@ -122,7 +134,7 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
                 <Card.Body>
                  {/* List menu items: */}
                  <ul className="list-unstyled">
-                   {dishes.map((dish) => (
+                   {summary.production.items.map((dish) => (
                      <li key={dish.id}>
 
                         <div className="d-flex flex-row justify-content-between align-items-center mb-4">
@@ -132,12 +144,18 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
                             <div className="d-flex flex-column">
                               <h5 className='mb-1'>{dish.name}</h5>
                               <p className="text-muted">{dish?.description} </p>
-                            </div>
+                            </div> 
                           </div>
 
                           <div className=''>
                             {/* Number */}
-                            <input type='number' className='form-control' onChange={update_quantity} defaultValue={dish.quantity} />
+                            <label>Quantity</label>
+                            <input
+                              type='number'
+                              className='form-control'
+                              onChange={(e) => { update_quantity(dish, dish.id, Number(e.target.value)) }}
+                              value={dish.quantity}
+                            />
                           </div>
                           {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
                             Edit Dish

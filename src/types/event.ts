@@ -27,17 +27,6 @@ export type ProgressEventStep = {
   status: string
 }
 
-export type Summary = {
-  production: {
-    total_guests: number
-    price_per_person: number
-    items: string[]
-  }
-  total_revenue: number
-  total_cost: number
-  total_profit: number
-}
-
 export type Dish = {
   id: number
   name: string
@@ -45,11 +34,25 @@ export type Dish = {
   menu: number
   position: number
   price: number
+  cost: number
   tags: string[]
   quantity: number
   created_at: string
   updated_at: string
 }
+
+export type Summary = {
+  production: {
+    total_guests: number
+    price_per_person: number
+    items: Dish[]
+  }
+  total_revenue: number
+  total_cost: number
+  total_profit: number
+}
+
+
 
 export type Event = {
   active: boolean
