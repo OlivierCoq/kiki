@@ -17,6 +17,7 @@ import { Dish, Summary } from '@/types/event'
 
 // Helpers
 import updateNestedValue from '@/helpers/NestedFields'
+import formatCurrency from '@/helpers/FormatCurrency'
 
 interface EventMenuProps {
   event: any;
@@ -42,11 +43,13 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
       const newItems = prev.production.items.map((item: any) =>
         item.id === dishId ? { ...item, quantity: newQuantity } : item
       );
+      console.log('newItems', newItems)
       // Calculate new total_cost based on all items' quantity * cost
       const newTotalCost = newItems.reduce(
         (sum: number, item: any) => sum + (item.quantity * item.cost),
         0
       );
+      console.log('new total cost', newTotalCost)
       return {
         ...prev,
         total_cost: newTotalCost,
@@ -144,6 +147,16 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
                             <div className="d-flex flex-column">
                               <h5 className='mb-1'>{dish.name}</h5>
                               <p className="text-muted">{dish?.description} </p>
+                              <div className="w-full d-flex flex-row">
+                                <div className="d-flex me-2">
+                                  <p className="font-bold font-strong me-1 mb-0 ">Cost:</p>
+                                  <small>{formatCurrency(dish?.cost)}</small>
+                                </div>
+                                <div className="d-flex">
+                                  <p className="font-bold font-strong me-1 mb-0 ">Price:</p>
+                                  <small>{formatCurrency(dish?.price)}</small>
+                                </div>
+                              </div>
                             </div> 
                           </div>
 
