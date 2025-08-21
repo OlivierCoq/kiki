@@ -281,6 +281,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
     console.log('updated event', data)
     await toggleSummaryPosting(false)
     toggleSummaryEdit()
+    // return data
   }
 
   const updateEventSummary = async (summary: any) => {
@@ -295,7 +296,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
 
     const data = await res.json()
     setSummary(data?.event?.summary)
-    console.log('updated event', data)
+    // console.log('updated event', data)
   }
 
   return (
@@ -555,10 +556,10 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                     <h5 className='mb-1'>Total Revenue</h5>
                                     <p className='mb-0'>{ formatCurrency(summary?.total_revenue) }</p>
                                   </Col>
-                                  <Col>
+                                  {/* <Col>
                                     <h5 className='mb-1'>Total Profit</h5>
                                     <p className='mb-0'>{ formatCurrency(summary?.total_profit) }</p>
-                                  </Col>
+                                  </Col> */}
                                 </Row>
                               </div>
                             }
@@ -650,7 +651,9 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                         )}
       
                         { progress_obj?.menu && (
-                          <ProgressMenu event={event} onUpdate={updateEventSummary} />
+                          <ProgressMenu event={event} onUpdate={updateEventSummary} parentData={() => {
+                            return summary
+                          }} />
                         )}
                         { progress_obj?.quote && (
                           <ProgressQuote event={event} />

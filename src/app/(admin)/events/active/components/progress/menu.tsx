@@ -21,12 +21,13 @@ import formatCurrency from '@/helpers/FormatCurrency'
 
 interface EventMenuProps {
   event: any;
+  parentData: any;
   onUpdate: (summary: any) => void | Promise<void>; // Callback function to handle update
 }
-const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
+const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps) => {
 
 
-  console.log('Edit Menu here...', event?.menu ? event.menu : null)
+  // console.log('Edit Menu here...', event?.menu ? event.menu : null)
 
   // Fetch menu from /api/menus/[id] endpoint
   const [menu, setMenu] = useState<any>(null)   
@@ -43,19 +44,27 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
       const newItems = prev.production.items.map((item: any) =>
         item.id === dishId ? { ...item, quantity: newQuantity } : item
       );
-      console.log('newItems', newItems)
+      // console.log('newItems', newItems)
       // Calculate new total_cost based on all items' quantity * cost
       const newTotalCost = newItems.reduce(
         (sum: number, item: any) => sum + (item.quantity * item.cost),
         0
       );
-      console.log('new total cost', newTotalCost)
+
+      const newTotalRevenue = newItems.reduce(
+        (sum: number, item: any) => sum + (item.quantity * item.price),
+        0
+      )
+
+      // console.log('new total cost', newTotalCost)
       return {
         ...prev,
         total_cost: newTotalCost,
+        total_revenue: newTotalRevenue,
         production: {
           ...prev.production,
           items: newItems,
+          total_guests: Number(parentData()?.production?.total_guests)
         },
       };
     });
@@ -69,6 +78,13 @@ const ProgressMenu = ({ event, onUpdate = () => {} }: EventMenuProps) => {
   }, [summary]);
 
   // Load data 
+
+  // Detect changes in summary externally
+  // useEffect(() => {
+
+  // }, [parentData])
+
+
   useEffect(() => {
     if (event?.menu) {
       try {
