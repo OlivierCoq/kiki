@@ -174,17 +174,28 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
 
     const [updating, setUpdating] = useState(false);
     const [dishItem, setDishItem] = useState<Dish>(dish)
+    const [deleting, setDeleting] = useState<boolean>(false)
 
     const handleUpdate = () => {
       setUpdating(false);
       // Simulate async update
       
     }
+
+    const handleDelete = () => {
+      setDeleting(true)
+    }
+
+    const confirmDelete = () => {
+
+    }
+    
     return (
       <div className="d-flex flex-row justify-content-between align-items-center mb-4">
 
-        {
-          updating ? 
+        
+         {
+          updating && !deleting &&
 
             <div className="d-flex flex-row w-75 w-sm-100">
               <IconifyIcon icon="mdi:food" className="me-2" />
@@ -210,13 +221,18 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                 </div>
               </div>
               <div className="d-flex flex-column justify-contents-center align-items-center">
-                <IconifyIcon icon="bx:edit" className="m-2 cursor-pointer text-primary" fontSize={15}  onClick={() => setUpdating(false)}  />
-                <IconifyIcon icon="bx:check" className='text-success cursor-pointer' fontSize={15} onClick={() => handleUpdate()}   />
+                <IconifyIcon icon="bx:edit" className="m-2 cursor-pointer" fontSize={15}  onClick={() => setUpdating(false)}  />
+                <IconifyIcon icon="bx:check" className='mb-4 text-success cursor-pointer' fontSize={15} onClick={() => handleUpdate()}   />
+                <IconifyIcon icon="bx:trash" className='text-danger cursor-pointer' fontSize={15} onClick={() => handleDelete()}   />
               </div>
             </div>
-
-          : 
+         }
           
+          
+         {
+
+          !updating && !deleting &&
+
             <div className="d-flex flex-row w-75 w-sm-100">
               <IconifyIcon icon="mdi:food" className="me-2" />
               <div className="d-flex flex-column">
@@ -236,7 +252,23 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                 </div>
               </div> 
             </div>
-        }
+         }
+
+         {
+          deleting &&
+
+            <div className="d-flex flex-column fade-in">
+              <div className="d-flex flex-row w-full">
+                <p>Do you really want to delete {dish?.name } ?</p>
+              </div>
+               <div className="d-flex flex-row justify-content-center align-items-center">
+                <button className="btn btn-sm btn-secondary me-2" onClick={() => setDeleting(false)}>Cancel</button>
+                <button className="btn btn-sm btn-danger">Confirm</button>
+               </div>
+            </div>
+
+         }
+        
         
 
         
