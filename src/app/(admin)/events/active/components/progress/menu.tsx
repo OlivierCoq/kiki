@@ -20,6 +20,7 @@ import { Dish, Summary } from '@/types/event'
 import updateNestedValue from '@/helpers/NestedFields'
 import formatCurrency from '@/helpers/FormatCurrency'
 
+
 interface EventMenuProps {
   event: any;
   parentData: any;
@@ -36,6 +37,9 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
   const [dishes, setDishes] = useState<Dish[]>([])
   const [loading, setLoading] = useState(true)
   const [summary, setSummary] = useState<Summary>(event.summary ? event.summary : null)
+  const [empty_result_msg, setEmpty_result_msg] = useState<string>('')
+
+
 
   const update_summary = async () => {
     onUpdate(summary)
@@ -105,6 +109,10 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
             console.log('Fetched menu data:', data)
             setMenu(data?.menu || null)
             await setDishes(data?.dishes)
+            await dishes?.forEach((dish: any) => {
+              dish['updating'] = false
+            })
+            
 
             /*
 
@@ -134,20 +142,145 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
               updateNestedValue('production.items', data?.dishes, setSummary)
               setLoading(false)
             }
-             
-           }
-
             
+           }
+           
+            setLoading(false)
           })
           .catch((error) => {
             console.error('Error fetching menu data:', error)
             setLoading(false)
           })
+          // setLoading(false)
       } catch (error) {
         console.error('Error in useEffect fetching menu:', error)
+        setLoading(false)
+      }
+      
+    } 
+    
+    const timer = setTimeout(async() => {
+    // Your code here (e.g., fetch data, update state, etc.)
+      setLoading(false)
+      setEmpty_result_msg("No menu found for this event. Click the New Menu button to get started!")
+    }, 1000);
+
+      return () => clearTimeout(timer)
+  }, [event])
+
+
+  // Update dishes
+  const DishItem = ({ dish }: { dish: Dish }) => {
+
+    const [updating, setUpdating] = useState(false);
+    const [dishItem, setDishItem] = useState<Dish>(dish)
+
+    const handleUpdate = () => {
+      setUpdating(false);
+      // Simulate async update
+      
+    }
+    return (
+      <div className="d-flex flex-row justify-content-between align-items-center mb-4">
+
+        {
+          updating ? 
+
+            <div className="d-flex flex-row w-75 w-sm-100">
+              <IconifyIcon icon="mdi:food" className="me-2" />
+              <div className="d-flex flex-column" style={{ width: '90%' }}>
+                <input className='form-control fade-in mb-1' type='text' defaultValue={dishItem?.name} placeholder='Name' />
+                <textarea className='form-control fade-in mb-1' rows={3} defaultValue={dishItem?.description} placeholder='Description'>
+                </textarea>
+                <div className="d-flex flex-row">
+                  <div className="d-flex flex-column me-2">
+                    <label htmlFor="">Cost</label>
+                    <div className="d-flex flex-row align-items-center">
+                      <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                      <input className='form-control fade-in mb-1' type='number' defaultValue={dishItem?.cost} placeholder='0' />
+                    </div>
+                  </div>
+                  <div className="d-flex flex-column">
+                    <label htmlFor="">Price</label>
+                    <div className="d-flex flex-row align-items-center">
+                      <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                      <input className='form-control fade-in mb-1' type='number' defaultValue={dishItem?.price} placeholder='0' />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="d-flex flex-column justify-contents-center align-items-center">
+                <IconifyIcon icon="bx:edit" className="m-2 cursor-pointer text-primary" fontSize={15}  onClick={() => setUpdating(false)}  />
+                <IconifyIcon icon="bx:check" className='text-success cursor-pointer' fontSize={15} onClick={() => handleUpdate()}   />
+              </div>
+            </div>
+
+          : 
+          
+            <div className="d-flex flex-row w-75 w-sm-100">
+              <IconifyIcon icon="mdi:food" className="me-2" />
+              <div className="d-flex flex-column">
+                <h5 className='mb-1'>{dishItem.name} &nbsp; 
+                  <IconifyIcon icon="bx:edit" className="me-2 cursor-pointer" onClick={() => setUpdating(true)}  />
+                </h5>
+                <p className="text-muted">{dishItem?.description} </p>
+                <div className="w-full d-flex flex-row">
+                  <div className="d-flex me-2">
+                    <p className="font-bold font-strong me-1 mb-0 ">Cost:</p>
+                    <small>{formatCurrency(event?.default_currency, dishItem?.cost)}</small>
+                  </div>
+                  <div className="d-flex">
+                    <p className="font-bold font-strong me-1 mb-0 ">Price:</p>
+                    <small>{formatCurrency(event?.default_currency, dishItem?.price)}</small>
+                  </div>
+                </div>
+              </div> 
+            </div>
+        }
+        
+
+        
+
+        <div className=''>
+          {/* Number */}
+          <label>Quantity</label>
+          <input
+            type='number'
+            className='form-control'
+            onChange={(e) => { update_quantity(dishItem, dishItem.id, Number(e.target.value)) }}
+            value={dishItem.quantity}
+          />
+        </div>
+        {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
+          Edit Dish
+        </Link> */}
+      </div>
+    )
+  }
+
+
+  // Update menu
+  const update_menu = async () => {
+
+  } 
+
+
+  // New Menu
+  const [newMenu, setNewMenu] = useState<boolean>(false) 
+  const toggleNewMenu = () => {
+    setNewMenu(!newMenu)
+  }
+  const submitNewMenu = async () => {
+
+    try {
+
+    }
+    catch{
+      (error: any) => {
+        console.log('Error submitting new Menu', error)
       }
     }
-  }, [event])
+  }
 
 
   return (
@@ -172,7 +305,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
               </Col>
         
             <Col md={3}>
-              <button className="btn btn-primary btn-sm mt-1">
+              <button className="btn btn-primary btn-sm mt-1" onClick={toggleNewMenu}>
                New Menu
                 <IconifyIcon icon="bx:plus" />
               </button>
@@ -184,81 +317,48 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
         </Row>
 
       {
-        menu ? (
-         <Row className='m-3'>
-          <Col>
-            <Card className='shadow-sm'>
-              <Card.Header>
-                <h4 className='mb-2'>Menu: {menu.name}</h4>
-                <p>{menu.description}</p>
-              </Card.Header>
-              <Card.Body>
-                {/* List menu items: */}
-                <ul className="list-unstyled">
-                  {summary.production.items.map((dish) => (
-                    <li key={dish.id}>
+        loading &&
+        <div className="text-center my-5">
+          {/* Loading animation */}
+          <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
+        </div>
+       }
 
-                      <div className="d-flex flex-row justify-content-between align-items-center mb-4">
+      
+       {
+         menu && !newMenu && 
 
-                        <div className="d-flex flex-row w-75 w-sm-100">
-                          <IconifyIcon icon="mdi:food" className="me-2" />
-                          <div className="d-flex flex-column">
-                            <h5 className='mb-1'>{dish.name}</h5>
-                            <p className="text-muted">{dish?.description} </p>
-                            <div className="w-full d-flex flex-row">
-                              <div className="d-flex me-2">
-                                <p className="font-bold font-strong me-1 mb-0 ">Cost:</p>
-                                <small>{formatCurrency(dish?.cost)}</small>
-                              </div>
-                              <div className="d-flex">
-                                <p className="font-bold font-strong me-1 mb-0 ">Price:</p>
-                                <small>{formatCurrency(dish?.price)}</small>
-                              </div>
-                            </div>
-                          </div> 
-                        </div>
+          <Row className='m-3'>
+            <Col>
+              <Card className='shadow-sm'>
+                <Card.Header>
+                  <h4 className='mb-2'>Menu: {menu.name}</h4>
+                  <p>{menu.description}</p>
+                </Card.Header>
+                <Card.Body>
+                  {/* List menu items: */}
+                  <ul className="list-unstyled">
+                    {summary?.production?.items?.map((dish) => (
+                     <DishItem key={dish.id} dish={dish} />
 
-                        <div className=''>
-                          {/* Number */}
-                          <label>Quantity</label>
-                          <input
-                            type='number'
-                            className='form-control'
-                            onChange={(e) => { update_quantity(dish, dish.id, Number(e.target.value)) }}
-                            value={dish.quantity}
-                          />
-                        </div>
-                        {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
-                          Edit Dish
-                        </Link> */}
-                      </div>
-                    </li>
+                    ))}
+                  </ul>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+       }
 
-                  ))}
-                </ul>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-        ) : 
+       
 
-        
-          (loading ? (
-          <div className="text-center my-5">
-              {/* Loading animation */}
-              <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
-            </div>
-          ) : (
-            <div className="text-center">
-              <p>No menu found for this event.</p>
-            </div>
-          ))
-        
-        
-      }
+       {
+        (!loading && !newMenu && !menu ) &&
 
+        <div className="text-center">
+          <p>{ empty_result_msg }</p>
+        </div>
 
-
+       }
 
       </div>
 

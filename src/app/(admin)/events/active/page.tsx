@@ -91,7 +91,8 @@ const ActiveEventsPage = () => {
             events?.map((event: Event) => event.active && ( <EventsCard key={event.id} event={event} onDelete={handleDeleteEvent} /> ))
           ) : (
             <Col>
-              <p>{ loading ? 'Loading ...' : 'No active events found.' }</p>
+             { loading ? 
+              <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" /> : <p>'No active events found.'</p>}
             </Col>
           )}
         </Row>

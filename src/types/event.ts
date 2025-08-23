@@ -3,6 +3,7 @@ export type VenueImage = {
   url: string
 }
 
+
 export type Venue = {
   id: number
   address: string
@@ -39,6 +40,7 @@ export type Dish = {
   quantity: number
   created_at: string
   updated_at: string
+  updating: boolean
 }
 
 export type Summary = {
@@ -113,5 +115,11 @@ export type Event = {
   summary: Summary
   start_time: string
   status: string
-  venue: Venue
+  venue: Venue,
+  archived: boolean
+  default_currency:{
+    code: string
+    symbol: string
+  }
 }
+

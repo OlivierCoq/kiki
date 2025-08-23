@@ -1,5 +1,11 @@
 // Format Currency Helper
-const formatCurrency = (amount: number) => {
+interface Currency {
+  code: string
+  symbol: string
+}
+
+const formatCurrency = (currency: Currency, amount: number) => {
+  // console.log('Currencyyyy', currency)
   if (typeof amount !== 'number') {
     // console.error('Invalid amount for currency formatting:', amount);
     return '';
@@ -7,7 +13,7 @@ const formatCurrency = (amount: number) => {
   
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency: currency?.code,
   }).format(amount);
 }
 

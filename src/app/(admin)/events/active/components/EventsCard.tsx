@@ -543,18 +543,19 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                   </Col>
                                   <Col>
                                     <h5 className='mb-1'>Total Cost</h5>
-                                    <p className='mb-0'>{ formatCurrency(summary?.total_cost) }</p>
+                                    <p className='mb-0'>{ formatCurrency(event?.default_currency, summary?.total_cost) }</p>
                                   </Col>
                                   {/* <Col>
                                     <h5 className='mb-1'>Price per Person</h5>
                                     <p className='mb-0'>{ formatCurrency(summary?.production?.price_per_person) }</p>
-                                  </Col> */}
+                                   
+                                  </Col> */} 
                                 </Row>
                                 <Row className='mb-3'>
                                   
                                   <Col>
                                     <h5 className='mb-1'>Total Revenue</h5>
-                                    <p className='mb-0'>{ formatCurrency(summary?.total_revenue) }</p>
+                                    <p className='mb-0'>{ formatCurrency(event?.default_currency, summary?.total_revenue) }</p>
                                   </Col>
                                   {/* <Col>
                                     <h5 className='mb-1'>Total Profit</h5>
@@ -609,7 +610,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                 <Row className='mb-3'>
                                   <Col>
                                     <h5 className='mb-1'>Total Profit</h5>
-                                    <p className='mb-0'>{ formatCurrency(event?.summary?.total_profit) }</p>
+                                    <p className='mb-0'>{ formatCurrency(event?.default_currency, event?.summary?.total_profit) }</p>
                                   </Col>
                                 </Row>
                               </div> 

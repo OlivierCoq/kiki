@@ -6,7 +6,7 @@ const supabase = createClient(process?.env?.NEXT_PUBLIC_SUPABASE_URL!, process?.
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { name, date, start_time, end_time, venue, customer, menu, notes, status, progress, summary } = body;
+  const { name, date, start_time, end_time, venue, customer, menu, notes, status, progress, summary, archived, default_currency } = body;
 
   console.log('Request body:', body);
   
@@ -25,7 +25,9 @@ export async function POST(req: Request) {
         notes,
         progress,
         status,
-        summary
+        summary,
+        archived,
+        default_currency
       }
     ]);
 

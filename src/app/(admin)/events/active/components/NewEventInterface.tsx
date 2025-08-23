@@ -223,7 +223,12 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
       zip: '',
       state: 'TN'
     } as Venue,
-    summary: summary
+    summary,
+    archived: false,
+      default_currency: {
+        code: 'USD',
+        symbol: '$'
+      }
   })
   let newEventObj = {
     name: newEvent?.name,
@@ -236,7 +241,12 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     notes: newEvent?.notes,
     progress,
     summary,
-    active: true
+    active: true,
+    archived: false,
+    default_currency: {
+        code: 'USD',
+        symbol: '$'
+      }
   }
 
     // Customer
@@ -605,7 +615,12 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
         "total_cost": 0,
         "total_revenue": 0,
         "total_profit": 0
-      } as Summary
+      } as Summary,
+      archived: false,
+      default_currency: {
+        code: 'USD',
+        symbol: '$'
+      }
     })
   }
   const submitNewEvent = async () => {
