@@ -105,3 +105,8 @@
   animation: fadeOut 0.5s forwards;
 }
 
+.btn:focus,
+.btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+}

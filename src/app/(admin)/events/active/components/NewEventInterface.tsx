@@ -753,6 +753,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                   className="form-control" 
                   defaultValue={newEvent.end_time} 
                   onChange={(e) => { updateNestedValue('end_time', e.target.value, setNewEvent) }}
+                  
                 />
                 { validating && !newEvent.end_time?.length && <small className="text-danger">Please enter an event end time.</small> }
               </div>
