@@ -4,32 +4,50 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(process?.env?.NEXT_PUBLIC_SUPABASE_URL!, process?.env?.SUPABASE_SERVICE_ROLE_SECRET!)
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) { 
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) { 
 
 
   const eventId = Number(params.id)
-  const body = await req.json()
   // const body = { venue: 2 }
 
-  // console.log("What we're working with here: ", eventId)
-  console.log('booody ', body)
 
   // Optionally validate input
-  if (!eventId || !body) {
+  if (!eventId) {
     return NextResponse.json({ error: 'Missing event ID or body' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
-    .from('events')
-    .update(body)
-    .eq('id', eventId)
-    .select()
-    .single()
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  try {
+    // Fetch the menu by ID
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single()
+
+    if (eventError) {
+      throw eventError
+    }
+
+    // Fetch dishes associated with the menu
+    // const { data: dishes, error: dishError } = await supabase
+    //   .from('dishes')
+    //   .select('*')
+    //   .in('id', menu?.dishes || [])
+
+    // if (dishError) {
+    //   throw dishError
+
+    // menuObj.dishes.forEach((d: any) => { return JSONBig.parse(d) })
+
+    // menuObj.dishes = dishes || []
+    // console.log('here we go', menuObj, menuObj.dishes, dishes)
+// JSONBig.parse(JSONBig.stringify(square_response))
+    // dishResults = JSONBig.parse(dishes) || []
+
+    return NextResponse.json({ event }, { status: 200 })
+  } catch (error) {
+    console.error('Error fetching event: ', error)
+    return NextResponse.json({ error: 'Failed to fetch menu or dishes' }, { status: 500 })
   }
-
-  return NextResponse.json({ message: 'Event updated successfully', event: data }, {status: 200 })
-
 }
 

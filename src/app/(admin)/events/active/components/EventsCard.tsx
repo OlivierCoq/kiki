@@ -72,7 +72,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
   } 
 
   // console.log('Event', event)
-
+  // console.log('Event summary default parent', event?.summary?.production?.items[0])
 
   // Progress
   const [progress_obj, set_progress_obj] = useState({
@@ -230,7 +230,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
   const toggleNotesEdit = () => { toggleEditNotes(!editNotes) }
   const editEventNotes = async () => {
     // console.log('neeewwwww', newNotes)
-
+    console.log('editEventNotes')
     const res = await fetch(`/api/events/${event?.id}`, {
       method: 'PATCH',
       headers: {
@@ -256,12 +256,12 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
   }
 
   const editEventSummary = async () => {
-    
+    console.log('editEventSummary')
     await toggleSummaryPosting(true)
 
 
 
-    const res = await fetch(`/api/events/${event?.id}`, {
+    const res = await fetch(`/api/events/update/${event?.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
@@ -286,7 +286,9 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
 
   const updateEventSummary = async (summary: any) => {
 
-    const res = await fetch(`/api/events/${event?.id}`, {
+    console.log('Patch here')
+
+    const res = await fetch(`/api/events/update/${event?.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
@@ -296,6 +298,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
 
     const data = await res.json()
     setSummary(data?.event?.summary)
+    return data?.event?.summary
     // console.log('updated event', data)
   }
 

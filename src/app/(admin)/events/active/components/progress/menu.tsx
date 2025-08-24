@@ -34,17 +34,19 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
   // Fetch menu from /api/menus/[id] endpoint
   const [menu, setMenu] = useState<any>(event.menu ? event.menu : null)   
   const [menus, setMenus] = useState<any>(null)   
-  const [loading, setLoading] = useState(true)
-  const [summary, setSummary] = useState<Summary>(event.summary ? event.summary : null)
+  const [loading, setLoading] = useState(false)
+  const [summary, setSummary] = useState<any>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
   const [empty_result_msg, setEmpty_result_msg] = useState<string>('')
 
+  // console.log('event summary default', event.summary.production.items[0])
  // Update handlers
   const update_summary = async () => {
     onUpdate(summary)
   }
 
-  const update_quantity = (dish: Dish, dishId: number, newQuantity: number) => {
-    setSummary((prev: Summary) => {
+  const update_quantity = async (dish: Dish, dishId: number, newQuantity: number) => {
+    await setSummary((prev: Summary) => {
       const newItems = prev.production.items.map((item: any) =>
         item.id === dishId ? { ...item, quantity: newQuantity } : item
       );
@@ -78,7 +80,9 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
   // Detect changes to Summary and send up component line, then to db:
   useEffect(() => {
     // console.log('summary updated:', summary);
-    update_summary()
+    if(summaryLoading) {
+       update_summary()
+    }
   }, [summary]);
 
   // Load all menus  
@@ -98,69 +102,76 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
     } 
   })
 
-  // Load main menu data
-  useEffect(() => {
-    if (event?.menu) {
-      try {
-        fetch(`/api/menus/${event.menu.id}`)
-          .then((res) => res.json())
-          .then(async (data) => {
-            setMenu(data?.menu || null)
-
-            /*
-
-              {
-                "production": {
-                "total_guests": 0,
-                "price_per_person": 0,
-                "items": []
-                },
-                "total_cost": 0,
-                "total_revenue": 0,
-                "total_profit": 0
-                }
-
-
-
-
-
-
-            */
-           if(!summary.production.items.length) {
-            // console.log('dishes empty: ', summary.production.items)
-            // console.log('wtffff', data.menu)
-            if(data?.menu?.dishes?.data?.length) {
-              
-              // console.log('dishes full', data?.dishes)
-              // await updateNestedValue('production.items', data?.dishes, setSummary)
-              updateNestedValue('production.items', data?.menu?.dishes?.data, setSummary)
-              setLoading(false)
-            }
-            
-           }
-           
-            setLoading(false)
-          })
-          .catch((error) => {
-            console.error('Error fetching menu data:', error)
-            setLoading(false)
-          })
-          // setLoading(false)
-      } catch (error) {
-        console.error('Error in useEffect fetching menu:', error)
-        setLoading(false)
+  // Load main data. This is some fresh bullshit, but I don't like React
+  useEffect(() => { 
+    if(!summary) {
+      setLoading(true)
+      fetch(`/api/events/${event.id}`)
+        .then((res) => res.json())
+        .then(async (data) => {
+          // console.log('smell my asshole', data)
+          setSummary(data?.event?.summary)
+          setLoading(false)
+        })
       }
-    } else {
+  })
+  // useEffect(() => {
+  //   if (event?.menu) {
+  //     try {
+  //       fetch(`/api/menus/${event.menu.id}`)
+  //         .then((res) => res.json())
+  //         .then(async (data) => {
+  //           setMenu(data?.menu || null)
 
-      const timer = setTimeout(async() => {
-      // Your code here (e.g., fetch data, update state, etc.)
-        setLoading(false)
-        setEmpty_result_msg("No menu found for this event. Click the New Menu button to get started!")
-      }, 1000);
+  //           /*
 
-      return () => clearTimeout(timer)
-    }
-  }, [event])
+  //             {
+  //               "production": {
+  //               "total_guests": 0,
+  //               "price_per_person": 0,
+  //               "items": []
+  //               },
+  //               "total_cost": 0,
+  //               "total_revenue": 0,
+  //               "total_profit": 0
+  //               }
+  //           */
+  //          if(!event.summary.production.items.length) {
+  //           // console.log('dishes empty: ', summary.production.items)
+  //           // console.log('wtffff', data.menu)
+  //           if(data?.menu?.dishes?.data?.length) {
+              
+  //               // console.log('dishes full', data?.dishes)
+  //               // await updateNestedValue('production.items', data?.dishes, setSummary)
+  //               await updateNestedValue('production.items', data?.menu?.dishes?.data, setSummary)
+  //               await update_summary()
+  //               setLoading(false)
+  //             }
+            
+  //          }
+           
+  //           setLoading(false)
+  //         })
+  //         .catch((error) => {
+  //           console.error('Error fetching menu data:', error)
+  //           setLoading(false)
+  //         })
+  //         // setLoading(false)
+  //     } catch (error) {
+  //       console.error('Error in useEffect fetching menu:', error)
+  //       setLoading(false)
+  //     }
+  //   } else {
+
+  //     const timer = setTimeout(async() => {
+  //     // Your code here (e.g., fetch data, update state, etc.)
+  //       setLoading(false)
+  //       setEmpty_result_msg("No menu found for this event. Click the New Menu button to get started!")
+  //     }, 1000);
+
+  //     return () => clearTimeout(timer)
+  //   }
+  // }, [event])
 
 
   // Update dishes
@@ -176,6 +187,8 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
     const [dishItem, setDishItem] = useState<Dish>(dish)
     const [deleting, setDeleting] = useState<boolean>(false)
     const [posting, setPosting] = useState<boolean>(false)
+
+    // console.log('default dishItem', dishItem.quantity)
 
     const handleUpdate = async () => {
       setUpdating(true)
@@ -226,6 +239,8 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
             .then(async (data) => {
               console.log('updated menu data:', data)
               onDishUpdate(update_response?.data)
+              update_summary()
+              onUpdate(summary)
               setUpdating(false)
               setPosting(false)
             })
@@ -367,8 +382,11 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
           <input
             type='number'
             className='form-control'
-            onChange={(e) => { update_quantity(dishItem, dishItem.id, Number(e.target.value)) }}
-            value={dishItem.quantity}
+            onChange={(e) => { 
+              setSummaryLoading(true)
+              update_quantity(dishItem, dishItem.id, Number(e.target.value))
+             }}
+            defaultValue={dishItem.quantity}
           />
         </div>
         {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
@@ -459,13 +477,13 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                 <Card.Body>
                   {/* List menu items: */}
                   <ul className="list-unstyled">
-                    {summary?.production?.items?.map((dish) => (
-                     <DishItem key={dish.id} dish={dish}onDishUpdate={updatedDish => {
-                          setSummary(prev => ({
+                    {summary?.production?.items?.map((dish: Dish) => (
+                     <DishItem key={dish.id} dish={dish} onDishUpdate={updatedDish => {
+                          setSummary((prev: Summary) => ({
                             ...prev,
                             production: {
                               ...prev.production,
-                              items: prev.production.items.map(item =>
+                              items: prev.production.items.map((item: any) =>
                                 item.id === updatedDish.id ? updatedDish : item
                               ),
                             },
