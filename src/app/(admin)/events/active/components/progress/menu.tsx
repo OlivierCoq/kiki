@@ -39,6 +39,8 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [empty_result_msg, setEmpty_result_msg] = useState<string>('')
 
+  // console.log('fuck me sideways', menu, event.menu)
+
   // console.log('event summary default', event.summary.production.items[0])
  // Update handlers
   const update_summary = async () => {
@@ -103,9 +105,8 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
   })
 
   // Load main data. This is some fresh bullshit, but I don't like React
-  useEffect(() => { 
-    if(!summary) {
-      setLoading(true)
+  const pullSummary = async () => {
+    setLoading(true)
       fetch(`/api/events/${event.id}`)
         .then((res) => res.json())
         .then(async (data) => {
@@ -113,7 +114,11 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
           setSummary(data?.event?.summary)
           setLoading(false)
         })
-      }
+  }
+  useEffect(() => { 
+    if(!summary) {
+      pullSummary()
+    }
   })
 
   useEffect(() => { 
@@ -197,13 +202,59 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
     tags: [],
     updating: false
   })
-  const addDish = async () => {
 
-    setAddingDish(true)
-  }
   const confirmAddDish = async () => {
+    setPostingNewDish(true)
+    // Validate:
+    if(!newDish.name) {
+      // setPostingNewDish(false)
+      return 
+    } else {
 
-    setAddingDish(false)
+      fetch('/api/dishes/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify( newDish )
+      })
+        .then(async (data) => {
+          let new_dish_obj = await data.json()
+          console.log('added dish to db', new_dish_obj)
+          
+          let menuObj = menu
+
+          menuObj.dishes.data.push(new_dish_obj)
+
+          await fetch(`/api/menus/update/${event?.menu?.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify( menuObj )
+          })
+            .then(async (data) => {
+              let updated_menu_data = await data.json()
+              console.log('updated menu', updated_menu_data)
+
+              setSummaryLoading(true)
+              await setSummary((prev: Summary) => ({
+                  ...prev,
+                  production: {
+                    ...prev.production,
+                    items: [...prev.production.items, new_dish_obj?.dish]
+                  }
+              }))
+              await update_summary()
+              await pullSummary()
+              await update_quantity(new_dish_obj?.dish, new_dish_obj?.dish?.id, 1)
+              
+              
+              setPostingNewDish(false)
+              setAddingDish(false)
+            })
+        })
+    }
   }
   interface DishItemProps {
     dish: Dish;
@@ -526,10 +577,15 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                     <div className="d-flex flex-row w-75 w-sm-100">
                       <IconifyIcon icon="mdi:food" className="me-2" />
                       <div className="d-flex flex-column" style={{ width: '90%' }}>
-                        <input className='form-control fade-in mb-1' type='text' defaultValue={newDish?.name} placeholder='Name'
+                        <input className='form-control fade-in mb-1' type='text' defaultValue={newDish?.name} placeholder='Dish Name'
                           onChange={(e) => { updateNestedValue('name', e.target.value, setNewDish) }}
                         />
-                        <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newDish?.description} placeholder='Description'
+                        {
+                          !newDish.name && postingNewDish &&
+
+                          <small className='text-danger'>Please add a name</small>
+                        }
+                        <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newDish?.description} placeholder='Dish Description'
                           onChange={(e) => { updateNestedValue('description', e.target.value, setNewDish) }}
                         >
                         </textarea>
@@ -556,12 +612,12 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                       </div>
                       <div className="d-flex flex-column justify-contents-center align-items-center">
                         <button className='btn btn-xs p-0 bg-transparent btn-outline-transparent btn-outline-none' disabled={postingNewDish} onClick={() => setPostingNewDish(false)}>
-                          <IconifyIcon icon="bx:edit" className="m-2 cursor-pointer" fontSize={15}    />
+                          <IconifyIcon icon="bx:plus" className="m-2 cursor-pointer" fontSize={15}    />
                         </button>
                         <IconifyIcon 
-                          icon={ postingNewDish ? "mdi:loading" : "bx:check"} 
-                          className={postingNewDish ? 'mb-4 text-danger spinner-border' : 'mb-4 text-success cursor-pointer' } 
-                          fontSize={15} 
+                          icon="bx:check"
+                          className={(!newDish.name && postingNewDish) ? "mb-4 text-neutral" : "mb-4 text-success cursor-pointer"}
+                          fontSize={20} 
                           onClick={() => confirmAddDish()}   />
                           {/* <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />  */}
                         <IconifyIcon icon="bx:x" className='text-danger cursor-pointer' fontSize={20} onClick={() => setAddingDish(false)}   />
@@ -572,7 +628,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                   <div className="d-flex flex-row justify-content-end">
                     <button 
                       className="btn btn-primary"
-                      onClick={addDish}
+                      onClick={() => { setAddingDish(true)}}
                     >
                       Add dish
                     </button>
