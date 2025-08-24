@@ -93,7 +93,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
           .then((res) => res.json())
           .then(async (data) => {
             setMenus(data?.menus)
-            console.log('menus', menu)
+            // console.log('menus', menu)
           })
         
       } catch (error) {
@@ -115,6 +115,14 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
         })
       }
   })
+
+  useEffect(() => { 
+    if(!event.menu) {
+      setEmpty_result_msg("No menu found for this event. Click the New Menu button to get started!")
+      setLoading(false)
+    }
+  })
+  
   // useEffect(() => {
   //   if (event?.menu) {
   //     try {
@@ -175,6 +183,28 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
 
 
   // Update dishes
+  
+  const [addingDish, setAddingDish] = useState(false)
+  const [postingNewDish, setPostingNewDish] = useState(false)
+  const [newDish, setNewDish] = useState<any>({
+    name: '',
+    category: '',
+    description: '',
+    menu: event?.menu?.id,
+    position: 0,
+    price: 0,
+    quantity: 0,
+    tags: [],
+    updating: false
+  })
+  const addDish = async () => {
+
+    setAddingDish(true)
+  }
+  const confirmAddDish = async () => {
+
+    setAddingDish(false)
+  }
   interface DishItemProps {
     dish: Dish;
     onDishUpdate: (updatedDish: Dish) => void;
@@ -210,7 +240,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
       })
         .then(async (data)=> {
           let update_response = await data.json()
-          console.log('Updated dish: ', update_response)
+          // console.log('Updated dish: ', update_response)
           setDishItem(update_response?.data)
 
           // Merge dish with event.menu.dishes array
@@ -237,7 +267,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
           })
             .then((res) => res.json())
             .then(async (data) => {
-              console.log('updated menu data:', data)
+              // console.log('updated menu data:', data)
               onDishUpdate(update_response?.data)
               update_summary()
               onUpdate(summary)
@@ -322,11 +352,11 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                 </button>
                 <IconifyIcon 
                   icon={ posting ? "mdi:loading" : "bx:check"} 
-                  className={posting ? 'mb-4 text-danger spinener-border' : 'mb-4 text-success cursor-pointer' } 
+                  className={posting ? 'mb-4 text-danger spinner-border' : 'mb-4 text-success cursor-pointer' } 
                   fontSize={15} 
                   onClick={() => handleUpdate()}   />
                   {/* <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />  */}
-                <IconifyIcon icon="bx:trash" className='text-danger cursor-pointer' fontSize={15} onClick={() => handleDelete()}   />
+                <IconifyIcon icon="bx:trash" className='text-danger text-sm p-2 cursor-pointer' fontSize={15} onClick={() => handleDelete()}   />
               </div>
             </div>
          }
@@ -396,11 +426,6 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
     )
   }
 
-
-  // Update menu
-  const update_menu_dishes = async (dish: Dish) => {
-
-  } 
 
 
   // New Menu
@@ -494,6 +519,66 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
 
                     ))}
                   </ul>
+
+                  {
+                    addingDish &&
+
+                    <div className="d-flex flex-row w-75 w-sm-100">
+                      <IconifyIcon icon="mdi:food" className="me-2" />
+                      <div className="d-flex flex-column" style={{ width: '90%' }}>
+                        <input className='form-control fade-in mb-1' type='text' defaultValue={newDish?.name} placeholder='Name'
+                          onChange={(e) => { updateNestedValue('name', e.target.value, setNewDish) }}
+                        />
+                        <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newDish?.description} placeholder='Description'
+                          onChange={(e) => { updateNestedValue('description', e.target.value, setNewDish) }}
+                        >
+                        </textarea>
+                        <div className="d-flex flex-row">
+                          <div className="d-flex flex-column me-2">
+                            <label htmlFor="">Cost</label>
+                            <div className="d-flex flex-row align-items-center">
+                              <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                              <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.cost} placeholder='0' 
+                              onChange={(e) => { updateNestedValue('cost', e.target.value, setNewDish) }}
+                            />
+                            </div>
+                          </div>
+                          <div className="d-flex flex-column">
+                            <label htmlFor="">Price</label>
+                            <div className="d-flex flex-row align-items-center">
+                              <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                              <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.price} placeholder='0'
+                                onChange={(e) => { updateNestedValue('price', e.target.value, setNewDish) }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="d-flex flex-column justify-contents-center align-items-center">
+                        <button className='btn btn-xs p-0 bg-transparent btn-outline-transparent btn-outline-none' disabled={postingNewDish} onClick={() => setPostingNewDish(false)}>
+                          <IconifyIcon icon="bx:edit" className="m-2 cursor-pointer" fontSize={15}    />
+                        </button>
+                        <IconifyIcon 
+                          icon={ postingNewDish ? "mdi:loading" : "bx:check"} 
+                          className={postingNewDish ? 'mb-4 text-danger spinner-border' : 'mb-4 text-success cursor-pointer' } 
+                          fontSize={15} 
+                          onClick={() => confirmAddDish()}   />
+                          {/* <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />  */}
+                        <IconifyIcon icon="bx:x" className='text-danger cursor-pointer' fontSize={20} onClick={() => setAddingDish(false)}   />
+                      </div>
+                    </div>
+                  }
+
+                  <div className="d-flex flex-row justify-content-end">
+                    <button 
+                      className="btn btn-primary"
+                      onClick={addDish}
+                    >
+                      Add dish
+                    </button>
+                  </div>
+                  
+
                 </Card.Body>
               </Card>
             </Col>

@@ -286,7 +286,7 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
 
   const updateEventSummary = async (summary: any) => {
 
-    console.log('Patch here')
+    // console.log('Patch here')
 
     const res = await fetch(`/api/events/update/${event?.id}`, {
       method: 'PATCH',
@@ -580,18 +580,19 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                                     />
                                   </Col>
                                   <Col className='m-0 p-0'>
-                                    <label htmlFor="price_per_person">Price per Person</label>
-                                    <input type="number" disabled id="price_per_person" className="form-control" defaultValue={summary?.production?.price_per_person} />
+                                    {/* <label htmlFor="price_per_person">Price per Person</label>
+                                    <input type="number" disabled id="price_per_person" className="form-control" defaultValue={summary?.production?.price_per_person} /> */}
+                                    <label htmlFor="total_cost">Total Cost</label>
+                                    <input type="number" disabled id="total_cost" className="form-control" defaultValue={summary?.total_cost} />
                                   </Col>
                                 </Row>
                                 <Row>
                                   <Col className='me-1 mb-2 p-0'>
-                                    <label htmlFor="total_cost">Total Cost</label>
-                                    <input type="number" disabled id="total_cost" className="form-control" defaultValue={summary?.total_cost} />
-                                  </Col>
-                                  <Col className='m-0 p-0'>
                                     <label htmlFor="total_revenue">Total Revenue</label>
                                     <input type="number" disabled id="total_revenue" className="form-control" defaultValue={summary?.total_revenue} />
+                                  </Col>
+                                  <Col className='m-0 p-0'>
+                                    
                                   </Col>
                                 </Row>
                                 <Row className='mb-3'>
