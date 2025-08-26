@@ -1,6 +1,7 @@
 //
 // app.scss
 //
+@use 'sass:color';
 
 // Core files
 @import "./node_modules/bootstrap/scss/functions";
@@ -109,4 +110,35 @@
 .btn:active {
   outline: none !important;
   box-shadow: none !important;
+}
+
+// all scrollbars on site:
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+
+  &:hover {
+    width: 10px;
+    // smooth transition
+    transition: width 0.3s;
+    cursor: pointer;
+  }
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgba(128, 128, 128, 0.183); 
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: darken($primary, 60%);
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: darken($primary, 50%);
+  cursor: pointer;
 }

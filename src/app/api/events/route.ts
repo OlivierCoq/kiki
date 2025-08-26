@@ -119,7 +119,9 @@ export async function GET() {
             ...event,
             menu: {   
               ...event.menu,
-              dishes: event.menu?.dishes?.map((dishId: number) => dishMap.get(dishId) || null) // Add dish data or null if not found
+              dishes: {
+                data: event.menu?.dishes?.map((dishId: number) => dishMap.get(dishId) || null) // Add dish data or null if not found
+              }
             }
           }))
           // console.log('Merged event data with dish data:', event_data)
@@ -129,7 +131,7 @@ export async function GET() {
       await get_customer_data(data)
       await get_venue_data(data)
       await get_menu_data(data)
-      // await get_dish_data(data)
+      await get_dish_data(data)
 
       // console.log('Final event data:', event_data)
       // Return the final event data with merged customer, venue, and menu data

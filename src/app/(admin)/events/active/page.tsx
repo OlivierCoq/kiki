@@ -27,6 +27,7 @@ const ActiveEventsPage = () => {
 // const supabase = await createClient()
   // const [events, setEvents] = useState<any[]>([])
   const { events, fetchEvents } = useEvents()
+  console.log('Events', events)
   const [loading, setLoading] = useState(!events || events.length === 0) // Set loading to true if events is null or empty
   const [mainEvent, setMainEvent] = useState<any>(null)
 

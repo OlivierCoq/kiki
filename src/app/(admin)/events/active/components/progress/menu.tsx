@@ -89,7 +89,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
 
   // Load all menus  
   useEffect(() => {
-    if(!menus || !menus.length) {
+    if(!menus || !menus.length || summaryLoading) {
         try {
         fetch(`/api/menus`)
           .then((res) => res.json())
@@ -102,7 +102,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
           console.error('Error in useEffect fetching menus:', error)
         }
     } 
-  })
+  }, [menus])
 
   // Load main data. This is some fresh bullshit, but I don't like React
   const pullSummary = async () => {
@@ -110,7 +110,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
       fetch(`/api/events/${event.id}`)
         .then((res) => res.json())
         .then(async (data) => {
-          // console.log('smell my asshole', data)
+
           setSummary(data?.event?.summary)
           setLoading(false)
         })
@@ -237,7 +237,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
               let updated_menu_data = await data.json()
               console.log('updated menu', updated_menu_data)
 
-              setSummaryLoading(true)
+              
               await setSummary((prev: Summary) => ({
                   ...prev,
                   production: {
@@ -350,13 +350,47 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
       setDeleting(true)
     }
 
-    const confirmDelete = async () => {
+    const confirmDeleteDish = async (dish: Dish) => {
       /* 
       - delete dish in db
       - merge dish to dishes array via setDishes
       - Update each quantity via update_quantity(dish, dish.id, dish.quantity)
       - update summary via setSummary
     */
+      console.log('help', dish, dish.id)
+      await setSummary((prev: any) => {
+        const items = [...prev.production.items]; // copy array
+        const index = items.findIndex((d: Dish) => d.id === dish.id);
+        if (index !== -1) items.splice(index, 1); // remove it
+
+        return {
+          ...prev,
+          production: {
+            ...prev.production,
+            items
+          }
+        };
+      })
+      await console.log('diiiiiish', summary)
+      await update_summary()
+      // await pullSummary()
+
+      /*
+await setSummary((prev: Summary) => ({
+                  ...prev,
+                  production: {
+                    ...prev.production,
+                    items: [...prev.production.items, new_dish_obj?.dish]
+                  }
+              }))
+              await update_summary()
+              await pullSummary()
+              await update_quantity(new_dish_obj?.dish, new_dish_obj?.dish?.id, 1)
+
+      */
+        
+        // menuObj.dishes.data = await menu?.dishes?.data?.filter((d:Dish)=> { d.id !== dish.id })
+        // await  console.log('fuuuuck me man', menu)
     }
     
     return (
@@ -407,7 +441,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                   fontSize={15} 
                   onClick={() => handleUpdate()}   />
                   {/* <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />  */}
-                <IconifyIcon icon="bx:trash" className='text-danger text-sm p-2 cursor-pointer' fontSize={15} onClick={() => handleDelete()}   />
+                <IconifyIcon icon="bx:trash" className='text-danger cursor-pointer' fontSize={15} onClick={() => handleDelete()}   />
               </div>
             </div>
          }
@@ -443,11 +477,11 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
 
             <div className="d-flex flex-column fade-in">
               <div className="d-flex flex-row w-full">
-                <p>Do you really want to delete {dish?.name } ?</p>
+                <p>Do you really want to delete <strong>{dish?.name }</strong> ?</p>
               </div>
                <div className="d-flex flex-row justify-content-center align-items-center">
                 <button className="btn btn-sm btn-secondary me-2" onClick={() => setDeleting(false)}>Cancel</button>
-                <button className="btn btn-sm btn-danger" onClick={() => confirmDelete}>Confirm</button>
+                <button className="btn btn-sm btn-danger" onClick={() => confirmDeleteDish(dish)}>Confirm</button>
                </div>
             </div>
 
@@ -481,13 +515,55 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
 
   // New Menu
   const [newMenu, setNewMenu] = useState<boolean>(false) 
+  const [postingNewMenu, setPostingNewMenu] = useState<boolean>(false) 
+  const [newMenuObj, setNewMenuObj] = useState<any>({
+    archived: false,
+    name: '',
+    description: '',
+    dishes: {
+      data: []
+    },
+    is_public: true,
+    packages: {
+      data: []
+    },
+    price_per_person: 0,
+    tags: []
+  })
   const toggleNewMenu = () => {
     setNewMenu(!newMenu)
   }
-  const submitNewMenu = async () => {
+  const submitNewMenu = async () => { 
 
+    setPostingNewMenu(true)
+
+    if(!newMenuObj.name || !newMenuObj.description) { return }
+    
     try {
+      await fetch('/api/menus/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newMenuObj)
+      })
+      .then(async (data) => {
+        const new_menu_result = await data.json()
+        console.log('new menu added: ', new_menu_result)
+       
+        
+        if(new_menu_result) {
+          
+          await fetch(`/api/menus`)
+          .then((res) => res.json())
+          .then(async (data) => {
+             await setMenus(data?.menus)
+              console.log('menus', data?.menus)
+          })
+        }
+        
 
+      })
     }
     catch{
       (error: any) => {
@@ -495,8 +571,27 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
       }
     }
   }
+  const updateMenu = async (e: any) => {
+
+    const target_menu = menus?.find((m: any) => m?.id === Number(e))
+    setMenu(target_menu)
 
 
+
+    // update db
+    await fetch(`/api/events/update/${event?.id}`, {
+       method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ menu: target_menu?.id })
+    })
+     .then(async (data) => {
+        const event_update = await data.json()
+        console.log('event update', event_update)
+     })
+  }
+ 
   return (
     <>
       <div>
@@ -508,12 +603,13 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                 {
                 menus && (
                   // onChange={setMenu} once we figure out wtf is going on
-                  <ChoicesFormInput className="form-control" data-choices id="choices-single-default" defaultValue={menu?.id} >
+                  <ChoicesFormInput className="form-control" data-choices id="choices-single-default" defaultValue={menu?.id} onChange={(e)=> {
+                      updateMenu(e)
+                  }}> 
                     { menus?.map((menu: any, i: number) => (
                       <option value={menu?.id} key={i}>{ menu?.name }</option>
                     ))}
-
-                    </ChoicesFormInput>
+                  </ChoicesFormInput>
 
                   )
                 }
@@ -550,7 +646,7 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
                   <h4 className='mb-2'>Menu: {menu.name}</h4>
                   <p>{menu.description}</p>
                 </Card.Header>
-                <Card.Body>
+                <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}>
                   {/* List menu items: */}
                   <ul className="list-unstyled">
                     {summary?.production?.items?.map((dish: Dish) => (
@@ -641,7 +737,35 @@ const ProgressMenu = ({ event, parentData, onUpdate = () => {} }: EventMenuProps
           </Row>
        }
 
-       
+       {
+        newMenu && 
+
+          <div className="d-flex flex-column px-5">
+            <div className="d-flex flex-column w-100">
+              <input className='form-control fade-in mb-1' type='text' defaultValue={newMenuObj?.name} placeholder='Name'
+                onChange={(e) => { updateNestedValue('name', e.target.value, setNewMenuObj) }}
+              />
+              {
+                postingNewMenu && !newMenuObj.name.length &&
+                  <small className='text-danger'> Please add a name.</small>
+              }
+              <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newMenuObj?.description} placeholder='Description'
+                onChange={(e) => { updateNestedValue('description', e.target.value, setNewMenuObj) }}
+              >
+              </textarea>
+              {
+                postingNewMenu && !newMenuObj.description.length &&
+                  <small className='text-danger'> Please add a name.</small>
+              }
+            </div>
+            <div className="d-flex flex-row justify-content-end align-items-end ps-2 py-2">
+              <button className="btn btn-primary " onClick={() => { submitNewMenu()}}>
+                Next
+                <IconifyIcon icon="mdi:arrow-right" className="me-2" />
+              </button>
+            </div>
+          </div>
+       }
 
        {
         (!loading && !newMenu && !menu ) &&

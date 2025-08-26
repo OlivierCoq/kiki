@@ -200,7 +200,6 @@ const ProgressVenue = ({ event }: { event: Event }) => {
               { venues?.map((venue: Venue, i: number) => (
                 <option value={venue?.id} key={i}>{ venue?.name }</option>
               ))}
-
             </ChoicesFormInput>
           </Col>
           <Col>
