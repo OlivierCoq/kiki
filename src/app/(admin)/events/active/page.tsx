@@ -13,8 +13,8 @@ import Link from 'next/link'
 
 //Events
 import { useEvents } from '@/context/useEventsContext'
-import EventsCard from './components/EventsCard'
-import { Event, Venue, ProgressEventStep, VenueImage } from '@/types/event'
+import  EventCard  from './components/EventCard'
+import { Event } from '@/types/event'
 
 import { NewEventInterface } from './components/NewEventInterface'
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
@@ -79,12 +79,6 @@ const ActiveEventsPage = () => {
     })
   }
 
-   const handleUpdateEvent = (updated: Event) => {
-    fetchEvents()
-    // setEvents(prev =>
-    //   prev.map(e => e.id === updated.id ? updated : e)
-    // )
-  }
 
   return (
     <Row>
@@ -92,11 +86,11 @@ const ActiveEventsPage = () => {
         <h3 className="mb-2">Active Events</h3>
         <p className="text-muted mb-4">Manage your active events here. You can view, edit, or delete events.</p>
       </Col>
-      <NewEventInterface onNewEvent={handleNewEvent} /> 
+      {/* <NewEventInterface onNewEvent={handleNewEvent} />  */}
       <Col md={12}>
         <Row>
         {(events?.length > 0) && !loading ? (
-            events?.map((event: Event) => event.active && ( <EventsCard onUpdate={handleUpdateEvent} key={event.id} event={event} onDelete={handleDeleteEvent} /> ))
+            events?.map((event: Event) => event.active && ( <EventCard  key={event.id} event={event} /> ))
           ) : (
             <Col>
              { loading ? 

@@ -29,15 +29,15 @@ import formatCurrency from '@/helpers/FormatCurrency'
 import updateNestedValue from '@/helpers/NestedFields'
 
 // Progress
-import ProgressVenue from '../components/progress/venue'
-import ProgressTasting from '../components/progress/tasting'
+import ProgressVenue from './progress/venue'
+import ProgressTasting from './progress/tasting'
 import ProgressMenu from './progress/menu'
-import ProgressQuote from '../components/progress/quote'
-import ProgressContract from '../components/progress/contract'
-import ProgressInvites from '../components/progress/invites'
-import ProgressIngredients from '../components/progress/ingredients'
-import ProgressProduction from '../components/progress/production'
-import ProgressDelivery from '../components/progress/delivery'
+import ProgressQuote from './progress/quote'
+import ProgressContract from './progress/contract'
+import ProgressInvites from './progress/invites'
+import ProgressIngredients from './progress/ingredients'
+import ProgressProduction from './progress/production'
+import ProgressDelivery from './progress/delivery'
 
 
 
