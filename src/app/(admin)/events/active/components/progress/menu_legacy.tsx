@@ -24,74 +24,83 @@ import formatCurrency from '@/helpers/FormatCurrency'
 interface EventMenuProps {
   event: any;
   parentData: any;
-  onUpdateEvent: (newEvent: Event) => void
+  onUpdate: (summary: any) => void | Promise<void>; // Callback function to handle update
 }
-const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenuProps) => {
-
-  console.log('Edit Menu here...', event?.menu)
-
-  // Main Menu
-    // State
-  const [menu, setMenu] = useState<any>(null)
-  const [loadingMenu, setLoadingMenu] = useState<boolean>(true) 
-  const [postingMenu, setPostingMenu] = useState<boolean>(false) 
-    // Methods
-      // fetch main menu
-  useEffect(() => {
-    setLoadingMenu(true)
-    try {
-      fetch(`/api/menus/${event?.menu?.id}`)
-        .then(async(data)=> {
-          const new_menu = await data.json()
-          // console.log('whaaaaa', new_menu)
-          setMenu(new_menu?.menu)
-          setLoadingMenu(false)
-        })
-    }
-    catch (error) {
-      console.error('Error in useEffect fetching menu:', error)
-    } 
-  }, [])
-  const updateMenu = async (e: any) => {
-    
-    
-    const target_menu = menus?.find((m: any) => m?.id === Number(e))
-    
-    setMenu(target_menu)
+const ProgressMenuLegacy = ({ event, parentData, onUpdate = () => {} }: EventMenuProps) => {
 
 
+  // console.log('Edit Menu here...', event?.menu ? event.menu : null)
 
-    // update db
-    await fetch(`/api/events/update/${event?.id}`, {
-       method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ menu: target_menu?.id })
-    })
-     .then(async (data) => {
-        // console.log('target_menu', target_menu)
-        const event_update = await data.json()
-        
-        console.log('event update', event_update)
-        onUpdateEvent(event_update?.event)
-     })
+  // Fetch menu from /api/menus/[id] endpoint
+  const [menu, setMenu] = useState<any>(event.menu ? event.menu : null)   
+  const [menus, setMenus] = useState<any>(null)   
+  const [loading, setLoading] = useState(false)
+  const [summary, setSummary] = useState<any>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [empty_result_msg, setEmpty_result_msg] = useState<string>('')
+
+  // console.log('fuck me sideways', menu, event.menu)
+
+  // console.log('event summary default', event.summary.production.items[0])
+ // Update handlers
+  const update_summary = async () => {
+    onUpdate(summary)
   }
-  
-  // Multiple Menus (For selecting and stuff)
-    // State
-  const [menus, setMenus] = useState<any>(null)
-  const [postingMenus, setPostingMenus] = useState<boolean>(false) 
-    // Methods
+
+  const update_quantity = async (dish: Dish, dishId: number, newQuantity: number) => {
+    await setSummary((prev: Summary) => {
+      const newItems = prev.production.items.map((item: any) =>
+        item.id === dishId ? { ...item, quantity: newQuantity } : item
+      );
+      // console.log('newItems', newItems)
+      // Calculate new total_cost based on all items' quantity * cost
+      const newTotalCost = newItems.reduce(
+        (sum: number, item: any) => sum + (item.quantity * item.cost),
+        0
+      );
+
+      const newTotalRevenue = newItems.reduce(
+        (sum: number, item: any) => sum + (item.quantity * item.price),
+        0
+      )
+
+      // console.log('new total cost', newTotalCost)
+      return {
+        ...prev,
+        total_cost: newTotalCost,
+        total_revenue: newTotalRevenue,
+        production: {
+          ...prev.production,
+          items: newItems,
+          total_guests: Number(parentData()?.production?.total_guests)
+        },
+      };
+    });
+  }
+
+
+  // Detect changes to Summary and send up component line, then to db:
+  // useEffect(() => {
+  //   // console.log('summary updated:', summary);
+  //   if(summaryLoading) {
+  //      update_summary()
+  //   }
+  // }, [summary]);
+
   useEffect(() => {
-    setPostingMenus(true)
-    if(!menus || !menus.length) {
+  if (summary) {
+    update_summary();
+  }
+}, [summary]);
+
+  // Load all menus  
+  useEffect(() => {
+    if(!menus || !menus.length || summaryLoading) {
         try {
         fetch(`/api/menus`)
           .then((res) => res.json())
           .then(async (data) => {
             setMenus(data?.menus)
-            setPostingMenus(false)
             // console.log('menus', menu)
           })
         
@@ -101,29 +110,91 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
     } 
   }, [menus])
 
-  // New Menu
-    // State
-  const [newMenu, setNewMenu] = useState<boolean>(false) 
-  const [postingNewMenu, setPostingNewMenu] = useState<boolean>(false) 
-  const [newMenuObj, setNewMenuObj] = useState<any>({
-    archived: false,
-    name: '',
-    description: '',
-    dishes: {
-      data: []
-    },
-    is_public: true,
-    packages: {
-      data: []
-    },
-    price_per_person: 0,
-    tags: []
-  })
-    // Methods
+  // Load main data. This is some fresh bullshit, but I don't like React
+  const pullSummary = async () => {
+    setLoading(true)
+      fetch(`/api/events/${event.id}`)
+        .then((res) => res.json())
+        .then(async (data) => {
 
-  // Dishes
-    // Methods
-    // Components
+          setSummary(data?.event?.summary)
+          setLoading(false)
+        })
+  }
+  useEffect(() => { 
+    if(!summary) {
+      pullSummary()
+    }
+  })
+
+  useEffect(() => { 
+    if(!event.menu) {
+      setEmpty_result_msg("No menu found for this event. Click the New Menu button to get started!")
+      setLoading(false)
+    }
+  })
+  
+  // useEffect(() => {
+  //   if (event?.menu) {
+  //     try {
+  //       fetch(`/api/menus/${event.menu.id}`)
+  //         .then((res) => res.json())
+  //         .then(async (data) => {
+  //           setMenu(data?.menu || null)
+
+  //           /*
+
+  //             {
+  //               "production": {
+  //               "total_guests": 0,
+  //               "price_per_person": 0,
+  //               "items": []
+  //               },
+  //               "total_cost": 0,
+  //               "total_revenue": 0,
+  //               "total_profit": 0
+  //               }
+  //           */
+  //          if(!event.summary.production.items.length) {
+  //           // console.log('dishes empty: ', summary.production.items)
+  //           // console.log('wtffff', data.menu)
+  //           if(data?.menu?.dishes?.data?.length) {
+              
+  //               // console.log('dishes full', data?.dishes)
+  //               // await updateNestedValue('production.items', data?.dishes, setSummary)
+  //               await updateNestedValue('production.items', data?.menu?.dishes?.data, setSummary)
+  //               await update_summary()
+  //               setLoading(false)
+  //             }
+            
+  //          }
+           
+  //           setLoading(false)
+  //         })
+  //         .catch((error) => {
+  //           console.error('Error fetching menu data:', error)
+  //           setLoading(false)
+  //         })
+  //         // setLoading(false)
+  //     } catch (error) {
+  //       console.error('Error in useEffect fetching menu:', error)
+  //       setLoading(false)
+  //     }
+  //   } else {
+
+  //     const timer = setTimeout(async() => {
+  //     // Your code here (e.g., fetch data, update state, etc.)
+  //       setLoading(false)
+  //       setEmpty_result_msg("No menu found for this event. Click the New Menu button to get started!")
+  //     }, 1000);
+
+  //     return () => clearTimeout(timer)
+  //   }
+  // }, [event])
+
+
+  // Update dishes
+  
   const [addingDish, setAddingDish] = useState(false)
   const [postingNewDish, setPostingNewDish] = useState(false)
   const [newDish, setNewDish] = useState<any>({
@@ -137,7 +208,7 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
     tags: [],
     updating: false
   })
-  const update_quantity = async (dish: Dish, newQuantity: number) => {}
+
   const confirmAddDish = async () => {
     setPostingNewDish(true)
     // Validate:
@@ -159,7 +230,7 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
           
           let menuObj = menu
 
-          menuObj.dishes.data.push(new_dish_obj?.dish)
+          menuObj.dishes.data.push(new_dish_obj)
 
           await fetch(`/api/menus/update/${event?.menu?.id}`, {
             method: 'PATCH',
@@ -173,7 +244,16 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
               console.log('updated menu', updated_menu_data)
 
               
-              await update_quantity(new_dish_obj?.dish, 1)
+              await setSummary((prev: Summary) => ({
+                  ...prev,
+                  production: {
+                    ...prev.production,
+                    items: [...prev.production.items, new_dish_obj?.dish]
+                  }
+              }))
+              await update_summary()
+              await pullSummary()
+              await update_quantity(new_dish_obj?.dish, new_dish_obj?.dish?.id, 1)
               
               
               setPostingNewDish(false)
@@ -246,7 +326,8 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
             .then(async (data) => {
               // console.log('updated menu data:', data)
               onDishUpdate(update_response?.data)
-
+              update_summary()
+              onUpdate(summary)
               setUpdating(false)
               setPosting(false)
             })
@@ -283,7 +364,41 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
       - update summary via setSummary
     */
       console.log('help', dish, dish.id)
+      await setSummary(async (prev: any) => {
+        const items = [...prev.production.items]; // copy array
+        const index = items?.findIndex((d: Dish) => d.id === dish.id);
+        
+        if (index !== -1) items.splice(index, 1); // remove it
+        console.log('holup', index !== -1, items)
 
+        return {
+          ...prev,
+          production: {
+            ...prev.production,
+            items: prev.production.items.filter((d: Dish) => d.id !== dish.id)
+          }
+        };
+      })
+      // await console.log('diiiiiish', summary)
+      // await  update_summary()
+      // await pullSummary()
+
+      /*
+await setSummary((prev: Summary) => ({
+                  ...prev,
+                  production: {
+                    ...prev.production,
+                    items: [...prev.production.items, new_dish_obj?.dish]
+                  }
+              }))
+              await update_summary()
+              await pullSummary()
+              await update_quantity(new_dish_obj?.dish, new_dish_obj?.dish?.id, 1)
+
+      */
+        
+        // menuObj.dishes.data = await menu?.dishes?.data?.filter((d:Dish)=> { d.id !== dish.id })
+        // await  console.log('fuuuuck me man', menu)
     }
     
     return (
@@ -391,9 +506,10 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
             type='number'
             className='form-control'
             onChange={(e) => { 
-              update_quantity(dishItem, Number(e.target.value))
+              setSummaryLoading(true)
+              update_quantity(dishItem, dishItem.id, Number(e.target.value))
              }}
-            defaultValue={dishItem?.quantity}
+            defaultValue={dishItem.quantity}
           />
         </div>
         {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
@@ -403,18 +519,90 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
     )
   }
 
+
+
+  // New Menu
+  const [newMenu, setNewMenu] = useState<boolean>(false) 
+  const [postingNewMenu, setPostingNewMenu] = useState<boolean>(false) 
+  const [newMenuObj, setNewMenuObj] = useState<any>({
+    archived: false,
+    name: '',
+    description: '',
+    dishes: {
+      data: []
+    },
+    is_public: true,
+    packages: {
+      data: []
+    },
+    price_per_person: 0,
+    tags: []
+  })
+  const toggleNewMenu = () => {
+    setNewMenu(!newMenu)
+  }
+  const submitNewMenu = async () => { 
+
+    setPostingNewMenu(true)
+
+    if(!newMenuObj.name || !newMenuObj.description) { return }
+    
+    try {
+      await fetch('/api/menus/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newMenuObj)
+      })
+      .then(async (data) => {
+        const new_menu_result = await data.json()
+        console.log('new menu added: ', new_menu_result)
+       
+        
+        if(new_menu_result) {
+          
+          await fetch(`/api/menus`)
+          .then((res) => res.json())
+          .then(async (data) => {
+             await setMenus(data?.menus)
+              console.log('menus', data?.menus)
+          })
+        }
+        
+
+      })
+    }
+    catch{
+      (error: any) => {
+        console.log('Error submitting new Menu', error)
+      }
+    }
+  }
+  const updateMenu = async (e: any) => {
+
+    const target_menu = menus?.find((m: any) => m?.id === Number(e))
+    setMenu(target_menu)
+
+
+
+    // update db
+    await fetch(`/api/events/update/${event?.id}`, {
+       method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ menu: target_menu?.id })
+    })
+     .then(async (data) => {
+        const event_update = await data.json()
+        console.log('event update', event_update)
+     })
+  }
+ 
   return (
     <>
-      <div className="">
-
-      {
-        loadingMenu &&
-        <div className="text-center my-5">
-          {/* Loading animation */}
-          <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
-        </div>
-        }
-
+      <div>
         <Row className='m-3'>
           <Col md={6}></Col>
           <Col md={6}>
@@ -430,32 +618,34 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
                       <option value={menu?.id} key={i}>{ menu?.name }</option>
                     ))}
                   </ChoicesFormInput>
+
                   )
                 }
               </Col>
         
-              <Col md={3}>
-                <button className="btn btn-primary btn-sm mt-1" onClick={() => { setNewMenu(!newMenu)}}>
-                  New Menu
-                  <IconifyIcon icon="bx:plus" />
-                </button>
-              </Col>
+            <Col md={3}>
+              <button className="btn btn-primary btn-sm mt-1" onClick={toggleNewMenu}>
+               New Menu
+                <IconifyIcon icon="bx:plus" />
+              </button>
+            </Col>
             
             </Row>
     
           </Col>
         </Row>
 
-        {
-          loadingMenu &&
-          <div className="text-center my-5">
-            {/* Loading animation */}
-            <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
-          </div>
-        }
+      {
+        loading &&
+        <div className="text-center my-5">
+          {/* Loading animation */}
+          <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
+        </div>
+       }
 
-        {
-          menu && menu?.dishes?.data?.length && !newMenu && 
+      
+       {
+         menu && !newMenu && 
 
           <Row className='m-3'>
             <Col>
@@ -467,11 +657,19 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
                 <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}>
                   {/* List menu items: */}
                   <ul className="list-unstyled">
-                    {menu?.dishes?.data?.map((dish: Dish) => (
-                      <DishItem key={dish?.id} dish={dish} onDishUpdate={updatedDish => {
-                          
+                    {summary?.production?.items?.map((dish: Dish) => (
+                     <DishItem key={dish.id} dish={dish} onDishUpdate={updatedDish => {
+                          setSummary((prev: Summary) => ({
+                            ...prev,
+                            production: {
+                              ...prev.production,
+                              items: prev.production.items.map((item: any) =>
+                                item.id === updatedDish.id ? updatedDish : item
+                              ),
+                            },
+                          }));
                           // Optionally, call your API here to update the summary in the DB
-                          update_quantity(updatedDish, updatedDish?.quantity) 
+                          update_quantity(updatedDish, updatedDish?.id, updatedDish?.quantity) 
                         }} />
 
                     ))}
@@ -545,10 +743,51 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
               </Card>
             </Col>
           </Row>
-        }
+       }
+
+       {
+        newMenu && 
+
+          <div className="d-flex flex-column px-5">
+            <div className="d-flex flex-column w-100">
+              <input className='form-control fade-in mb-1' type='text' defaultValue={newMenuObj?.name} placeholder='Name'
+                onChange={(e) => { updateNestedValue('name', e.target.value, setNewMenuObj) }}
+              />
+              {
+                postingNewMenu && !newMenuObj.name.length &&
+                  <small className='text-danger'> Please add a name.</small>
+              }
+              <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newMenuObj?.description} placeholder='Description'
+                onChange={(e) => { updateNestedValue('description', e.target.value, setNewMenuObj) }}
+              >
+              </textarea>
+              {
+                postingNewMenu && !newMenuObj.description.length &&
+                  <small className='text-danger'> Please add a name.</small>
+              }
+            </div>
+            <div className="d-flex flex-row justify-content-end align-items-end ps-2 py-2">
+              <button className="btn btn-primary " onClick={() => { submitNewMenu()}}>
+                Next
+                <IconifyIcon icon="mdi:arrow-right" className="me-2" />
+              </button>
+            </div>
+          </div>
+       }
+
+       {
+        (!loading && !newMenu && !menu ) &&
+
+        <div className="text-center">
+          <p>{ empty_result_msg }</p>
+        </div>
+
+       }
 
       </div>
+
     </>
   )
- }
-export default ProgressMenu
+}
+
+export default ProgressMenuLegacy

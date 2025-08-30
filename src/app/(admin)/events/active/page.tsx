@@ -79,6 +79,13 @@ const ActiveEventsPage = () => {
     })
   }
 
+   const handleUpdateEvent = (updated: Event) => {
+    fetchEvents()
+    // setEvents(prev =>
+    //   prev.map(e => e.id === updated.id ? updated : e)
+    // )
+  }
+
   return (
     <Row>
       <Col md={10}>
@@ -89,7 +96,7 @@ const ActiveEventsPage = () => {
       <Col md={12}>
         <Row>
         {(events?.length > 0) && !loading ? (
-            events?.map((event: Event) => event.active && ( <EventsCard key={event.id} event={event} onDelete={handleDeleteEvent} /> ))
+            events?.map((event: Event) => event.active && ( <EventsCard onUpdate={handleUpdateEvent} key={event.id} event={event} onDelete={handleDeleteEvent} /> ))
           ) : (
             <Col>
              { loading ? 

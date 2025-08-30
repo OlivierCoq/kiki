@@ -114,7 +114,6 @@ export type Event = {
   progress: {
     data: ProgressEventStep[]
   }
-  summary: Summary
   start_time: string
   status: string
   venue: Venue,
@@ -123,5 +122,11 @@ export type Event = {
     code: string
     symbol: string
   }
+  summary: Summary
+  // BEO Summary
+  guest_num: number
+  total_revenue: number
+  total_cost: number
+  total_profit: number
 }
 

@@ -20,7 +20,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .eq('archived', false)
+      .eq('archived', true)
       .order('created_at', { ascending: false })
 
     if (error) {

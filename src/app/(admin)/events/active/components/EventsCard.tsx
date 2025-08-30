@@ -31,7 +31,7 @@ import updateNestedValue from '@/helpers/NestedFields'
 // Progress
 import ProgressVenue from '../components/progress/venue'
 import ProgressTasting from '../components/progress/tasting'
-import ProgressMenu from '../components/progress/menu'
+import ProgressMenu from './progress/menu'
 import ProgressQuote from '../components/progress/quote'
 import ProgressContract from '../components/progress/contract'
 import ProgressInvites from '../components/progress/invites'
@@ -45,6 +45,7 @@ import ProgressDelivery from '../components/progress/delivery'
 
 export interface EventsCardProps {
   event: any;
+  onUpdate: (event: Event) => void
   onDelete: () => void; // Callback function to handle deletion
 }
 const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
@@ -53,14 +54,15 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
   // Modal toggle
   const { isTrue, toggle } = useToggle()
 
-  const [mainEvent, setMainEvent] = useState<any>(null)
-  const toggleMainEvent = (event: any) => {
-    setMainEvent(event)
-    toggle()
-  }
+
   const [deleteEvent, setDeleteEvent] = useState<boolean>(false)
   const toggleDelete = () => {
     setDeleteEvent(!deleteEvent)
+  }
+  
+  const updateEvent = async (event: Event) => {
+     console.log('send this to the db: ', event)
+
   }
 
   // UI
@@ -656,8 +658,8 @@ const EventsCard = ({ event, onDelete = () => {} }: EventsCardProps) => {
                         )}
       
                         { progress_obj?.menu && (
-                          <ProgressMenu event={event} onUpdate={updateEventSummary} parentData={() => {
-                            return summary
+                          <ProgressMenu event={event} onUpdateEvent={updateEvent} parentData={() => {
+                            return true
                           }} />
                         )}
                         { progress_obj?.quote && (
