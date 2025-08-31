@@ -24,7 +24,13 @@ import { worldCountries } from '@/assets/data/world-countries'
 import formatText from '@/helpers/FormatText'
 
 
-const ProgressVenue = ({ event }: { event: Event }) => {
+const ProgressVenue = ({
+  event,
+  onUpdate,
+}: {
+  event: Event
+  onUpdate: (event: Event) => void
+}) => {
 
     // State
   const [venue, setVenue] = useState<Venue | null>(null)
@@ -241,26 +247,116 @@ const ProgressVenue = ({ event }: { event: Event }) => {
   // console.log('Edit Venue here...', venues)
 
 
-  const updateEvent = async (venue: any) => {
+  const updateEvent = async (ven: any) => {
 
-    const res = await fetch(`/api/events/${event?.id}`, {
+    console.log('new Venue id: ', venue)
+    fetch(`/api/events/update/${event?.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ venue })
+      body: JSON.stringify({ venue: ven })
     })
+      .then(async(data) => {
+        const res = await data.json()
+        // console.log('successs', res)
+        onUpdate(res?.event)
+      })
 
     
-
-    const data = await res.json()
-    // console.log('resuklt', data?.event)
-    const new_venue = venues?.find((venue: Venue) => venue?.id === data?.event?.venue)
-    let new_event = event
-    new_event.venue = new_venue
-    setNewEvent(new_event)
-    setNewVenue(new_venue)
+    const new_venue =  venues?.find((v: Venue) => v?.id === Number(ven))
+    console.log('venues', new_venue)
+    setVenue(new_venue)
+    console.log(venue, new_venue)
   }
+
+  interface venueProps {
+      venue: Venue;
+      onVenueUpdate: (updatedVenue: Venue) => void;
+    }
+  const VenueViewer = ({ venue, onVenueUpdate }: venueProps) => {
+
+    const [targetVenue, setTargetVenue] = useState<Venue>(venue)
+
+    return(
+      <>
+        <Row>
+          <Col md={6}>
+            <div className="mb-0 row">
+              <div className="col-12 d-flex flex-row align-items-center">
+                <IconifyIcon icon="bx-building-house" fontSize='20' className="me-2" />
+                <h4 className='mt-2'>{targetVenue?.name}</h4>
+              </div>
+            </div>
+            <div className="mb-0 row">
+              <div className="col-12 d-flex flex-row align-items-center">
+                <IconifyIcon icon="bx-map" fontSize='20' className="me-2" />
+                <p className='mt-2'>
+                  {targetVenue?.address} <br/>
+                  {targetVenue?.city}, {targetVenue?.state} {targetVenue?.zip}
+                </p>
+              </div>
+            </div>
+            <h4 className='mt-3 mb-3'>Contact Person</h4>
+            <div className="row">
+              <div className="col-12 d-flex flex-row ">
+                <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
+                <p>{targetVenue?.contact_name}</p>
+              </div>
+            </div>
+            <div className="row mb-2">
+              <div className="col-12 d-flex flex-row align-items-center">
+                <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
+                <a href={`tel:${targetVenue?.contact_number}`}>
+                  {targetVenue?.contact_number || 'No contact number provided.'}
+                </a>
+              </div>
+            </div>
+            <div className="row mb-2">
+              <div className="col-12 d-flex flex-row align-items-center">
+                <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
+                <a href={`mailto:${targetVenue?.contact_email}`}>
+                  {targetVenue?.contact_email || 'No contact email provided.'}
+                </a>
+              </div>
+            </div>
+            <div className="row mb-2">
+              <div className="col-12 d-flex flex-row align-items-center">
+                <IconifyIcon icon="bx-group" fontSize='20' className="me-2" />
+                <p className='mt-2'>
+                  {targetVenue?.capacity ? `Capacity: ${targetVenue?.capacity}` : 'No capacity information provided.'}
+                </p>
+              </div>
+            </div>
+            <h5 className='mt-4'>Notes</h5>
+            <div className="row mb-2">
+              <div className="col-12 d-flex flex-row align-items-center">
+                <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
+                <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatText(targetVenue?.notes) || 'No additional notes provided.' }}></div>
+              </div>
+            </div>
+          </Col>
+          <Col md={6} className="text-end">
+            <div className="mapouter">
+              <div className="gmap_canvas">
+                <iframe
+                  className="gmap_iframe rounded"
+                  width="100%"
+                  style={{ height: 418 }}
+                  frameBorder={0}
+                  scrolling="no"
+                  marginHeight={0}
+                  marginWidth={0}
+                  src={ `https://maps.google.com/maps?width=1980&height=400&hl=en&q=${ targetVenue?.address } ${ targetVenue?.city }, ${ targetVenue?.state } ${ targetVenue?.zip }&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
+                />
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </>
+    )
+  }
+
 
   return (
     <>
@@ -272,151 +368,157 @@ const ProgressVenue = ({ event }: { event: Event }) => {
         </div>
       }
       {
-        !loadingVenue &&
+        !loadingVenue && venue &&
 
         <Row className='mt-4'>
           <Col med={6}>
             <div className="rounded bg-light p-4">
               { newVenue ? 
-              <Row>
-                <Col md={6}>
-                  <div className="mb-0 row">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-building-house" fontSize='20' className="me-2" />
-                      <h4 className='mt-2'>{newVenue?.name}</h4>
-                    </div>
-                  </div>
-                  <div className="mb-0 row">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-map" fontSize='20' className="me-2" />
-                      <p className='mt-2'>
-                        {venue?.address} <br/>
-                        {venue?.city}, {venue?.state} {venue?.zip}
-                      </p>
-                    </div>
-                  </div>
-                  <h4 className='mt-3 mb-3'>Contact Person</h4>
-                  <div className="row">
-                    <div className="col-12 d-flex flex-row ">
-                      <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
-                      <p>{venue?.contact_name}</p>
-                    </div>
-                  </div>
-                  <div className="row mb-2">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
-                      <a href={`tel:${venue?.contact_number}`}>
-                        {venue?.contact_number || 'No contact number provided.'}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="row mb-2">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
-                      <a href={`mailto:${venue?.contact_email}`}>
-                        {venue?.contact_email || 'No contact email provided.'}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="row mb-2">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-group" fontSize='20' className="me-2" />
-                      <p className='mt-2'>
-                        {venue?.capacity ? `Capacity: ${venue?.capacity}` : 'No capacity information provided.'}
-                      </p>
-                    </div>
-                  </div>
-                  <h5 className='mt-4'>Notes</h5>
-                  <div className="row mb-2">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
-                      <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatText(venue?.notes) || 'No additional notes provided.' }}></div>
-                    </div>
-                  </div>
-                </Col>
-                <Col md={6} className="text-end">
-                  <div className="mapouter">
-                    <div className="gmap_canvas">
-                      <iframe
-                        className="gmap_iframe rounded"
-                        width="100%"
-                        style={{ height: 418 }}
-                        frameBorder={0}
-                        scrolling="no"
-                        marginHeight={0}
-                        marginWidth={0}
-                        src={ `https://maps.google.com/maps?width=1980&height=400&hl=en&q=${ venue?.address } ${ venue?.city }, ${ venue?.state } ${ venue?.zip }&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
-                      />
-                    </div>
-                  </div>
-                </Col>
-              </Row>
+                <VenueViewer venue={newVenue} onVenueUpdate={() => {
+                  console.log('updating venue')
+                }} />
+              // <Row>
+              //   <Col md={6}>
+              //     <div className="mb-0 row">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-building-house" fontSize='20' className="me-2" />
+              //         <h4 className='mt-2'>{newVenue?.name}</h4>
+              //       </div>
+              //     </div>
+              //     <div className="mb-0 row">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-map" fontSize='20' className="me-2" />
+              //         <p className='mt-2'>
+              //           {venue?.address} <br/>
+              //           {venue?.city}, {venue?.state} {venue?.zip}
+              //         </p>
+              //       </div>
+              //     </div>
+              //     <h4 className='mt-3 mb-3'>Contact Person</h4>
+              //     <div className="row">
+              //       <div className="col-12 d-flex flex-row ">
+              //         <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
+              //         <p>{venue?.contact_name}</p>
+              //       </div>
+              //     </div>
+              //     <div className="row mb-2">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
+              //         <a href={`tel:${venue?.contact_number}`}>
+              //           {venue?.contact_number || 'No contact number provided.'}
+              //         </a>
+              //       </div>
+              //     </div>
+              //     <div className="row mb-2">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
+              //         <a href={`mailto:${venue?.contact_email}`}>
+              //           {venue?.contact_email || 'No contact email provided.'}
+              //         </a>
+              //       </div>
+              //     </div>
+              //     <div className="row mb-2">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-group" fontSize='20' className="me-2" />
+              //         <p className='mt-2'>
+              //           {venue?.capacity ? `Capacity: ${venue?.capacity}` : 'No capacity information provided.'}
+              //         </p>
+              //       </div>
+              //     </div>
+              //     <h5 className='mt-4'>Notes</h5>
+              //     <div className="row mb-2">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
+              //         <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatText(venue?.notes) || 'No additional notes provided.' }}></div>
+              //       </div>
+              //     </div>
+              //   </Col>
+              //   <Col md={6} className="text-end">
+              //     <div className="mapouter">
+              //       <div className="gmap_canvas">
+              //         <iframe
+              //           className="gmap_iframe rounded"
+              //           width="100%"
+              //           style={{ height: 418 }}
+              //           frameBorder={0}
+              //           scrolling="no"
+              //           marginHeight={0}
+              //           marginWidth={0}
+              //           src={ `https://maps.google.com/maps?width=1980&height=400&hl=en&q=${ venue?.address } ${ venue?.city }, ${ venue?.state } ${ venue?.zip }&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
+              //         />
+              //       </div>
+              //     </div>
+              //   </Col>
+              // </Row>
               :
-              <Row>
-                <Col md={6}>
-                  <div className="mb-0 row">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-building-house" fontSize='20' className="me-2" />
-                      <h4 className='mt-2'>{venue?.name}</h4>
-                    </div>
-                  </div>
-                  <div className="mb-0 row">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-map" fontSize='20' className="me-2" />
-                      <p className='mt-2'>
-                        {venue?.address} <br/>
-                        {venue?.city}, {venue?.state} {venue?.zip}
-                      </p>
-                    </div>
-                  </div>
-                  <h4 className='mt-3 mb-3'>Contact Person</h4>
-                  <div className="row">
-                    <div className="col-12 d-flex flex-row ">
-                      <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
-                      <p>{venue?.contact_name || 'No contact name provided.'}</p>
-                    </div>
-                  </div>
-                  <div className="row mb-2">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
-                      <a href={`tel:${venue?.contact_number}`}>
-                        {venue?.contact_number || 'No contact number provided.'}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="row  mb-2">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
-                      <a href={`mailto:${venue?.contact_email}`}>
-                        {venue?.contact_email || 'No contact email provided.'}
-                      </a>
-                    </div>
-                  </div>
-                  <h5 className='mt-4'>Notes</h5>
-                  <div className="row mb-2">
-                    <div className="col-12 d-flex flex-row align-items-center">
-                      <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
-                      <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatText(venue?.notes) || 'No additional notes provided.' }}></div>
-                    </div>
-                  </div>
-                </Col>
-                <Col md={6} className="text-end">
-                  <div className="mapouter">
-                    <div className="gmap_canvas">
-                      <iframe
-                        className="gmap_iframe rounded"
-                        width="100%"
-                        style={{ height: 418 }}
-                        frameBorder={0}
-                        scrolling="no"
-                        marginHeight={0}
-                        marginWidth={0}
-                        src={ `https://maps.google.com/maps?width=1980&height=400&hl=en&q=${ venue?.address } ${ venue?.city }, ${ venue?.state } ${ venue?.zip }&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
-                      />
-                    </div>
-                  </div>
-                </Col>
-              </Row>
+              <VenueViewer venue={venue} onVenueUpdate={() => {
+                  console.log('updating venue')
+                }} />
+              // <Row>
+              //   <Col md={6}>
+              //     <div className="mb-0 row">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-building-house" fontSize='20' className="me-2" />
+              //         <h4 className='mt-2'>{venue?.name}</h4>
+              //       </div>
+              //     </div>
+              //     <div className="mb-0 row">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-map" fontSize='20' className="me-2" />
+              //         <p className='mt-2'>
+              //           {venue?.address} <br/>
+              //           {venue?.city}, {venue?.state} {venue?.zip}
+              //         </p>
+              //       </div>
+              //     </div>
+              //     <h4 className='mt-3 mb-3'>Contact Person</h4>
+              //     <div className="row">
+              //       <div className="col-12 d-flex flex-row ">
+              //         <IconifyIcon icon="bx-user" fontSize='20' className="me-2" />
+              //         <p>{venue?.contact_name || 'No contact name provided.'}</p>
+              //       </div>
+              //     </div>
+              //     <div className="row mb-2">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-phone" fontSize='20' className="me-2" />
+              //         <a href={`tel:${venue?.contact_number}`}>
+              //           {venue?.contact_number || 'No contact number provided.'}
+              //         </a>
+              //       </div>
+              //     </div>
+              //     <div className="row  mb-2">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-envelope" fontSize='20' className="me-2" />
+              //         <a href={`mailto:${venue?.contact_email}`}>
+              //           {venue?.contact_email || 'No contact email provided.'}
+              //         </a>
+              //       </div>
+              //     </div>
+              //     <h5 className='mt-4'>Notes</h5>
+              //     <div className="row mb-2">
+              //       <div className="col-12 d-flex flex-row align-items-center">
+              //         <IconifyIcon icon="bx-message-alt-detail" fontSize='20' className="me-2" />
+              //         <div className='mt-2' dangerouslySetInnerHTML={{ __html: formatText(venue?.notes) || 'No additional notes provided.' }}></div>
+              //       </div>
+              //     </div>
+              //   </Col>
+              //   <Col md={6} className="text-end">
+              //     <div className="mapouter">
+              //       <div className="gmap_canvas">
+              //         <iframe
+              //           className="gmap_iframe rounded"
+              //           width="100%"
+              //           style={{ height: 418 }}
+              //           frameBorder={0}
+              //           scrolling="no"
+              //           marginHeight={0}
+              //           marginWidth={0}
+              //           src={ `https://maps.google.com/maps?width=1980&height=400&hl=en&q=${ venue?.address } ${ venue?.city }, ${ venue?.state } ${ venue?.zip }&t=&z=14&ie=UTF8&iwloc=B&output=embed`}
+              //         />
+              //       </div>
+              //     </div>
+              //   </Col>
+              // </Row>
             }
             </div>
           </Col>

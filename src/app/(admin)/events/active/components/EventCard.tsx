@@ -6,10 +6,7 @@ import Link from 'next/link'
 
 // UI
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
-  // helpers
-import formatText from '@/helpers/FormatText'
-import formatCurrency from '@/helpers/FormatCurrency'
-import updateNestedValue from '@/helpers/NestedFields'
+
   // Bootstrap
 import { 
   Card, 
@@ -29,8 +26,6 @@ import useToggle from '@/hooks/useToggle'
 
   // App
 import EventModalBody from './modal/base'
-import CostomerPanel from './customer'
-
   // Interfaces + Types
 import { Event } from '@/types/event'
   // Data
@@ -50,122 +45,7 @@ const EventCard = ({ event }: { event: Event }) => {
     // Derived field: total cost
   // const totalCost = event.menu?.items?.reduce((sum, i) => sum + i.price * i.quantity, 0) ?? 0
 
-  // UI
-  const time_convert = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const convertedHours = hours % 12 || 12; // Convert to 12-hour format
-    return `${convertedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-  } 
 
-    // Progress
-  // const [progress_obj, set_progress_obj] = useState({
-  //   venue: true,
-  //   // tasting: false,
-  //   menu: false,
-  //   quote: false,
-  //   contract: false,
-  //   invites: false,
-  //   ingredients: false,
-  //   production: false,
-  //   delivery: false
-  // })
-  // const progress_width = (milestone: any) => {
-  //   switch(milestone?.status) {
-  //     case null:
-  //       return '0%'
-  //       break;
-  //     case "in_progress":
-  //       return '50%'
-  //       break;
-  //     case "confirmed":
-  //       return '100%'
-  //       break;
-  //     default:
-  //       return '0%';
-  //   }
-  // }
-  // const progress_class = (milestone: any) => {
-  //   switch(milestone?.status) {
-  //     case null:
-  //       return ''
-  //       break;
-  //     case "in_progress":
-  //       return 'bg-warning'
-  //       break;
-  //     case "confirmed":
-  //       return 'bg-success'
-  //       break;
-  //     default:
-  //       return '';
-  //   }
-  // }
-  // const toggleProgress = (key: keyof typeof progress_obj) => {
-  //   set_progress_obj(prev => {
-  //     const allFalse = Object.keys(prev).reduce((acc, k) => {
-  //       acc[k as keyof typeof progress_obj] = false
-  //       return acc
-  //     }, {} as typeof progress_obj)
-  
-  //     // If already selected, toggle off (set all false), else set only this one to true
-  //     const isAlreadyTrue = prev[key]
-  //     return isAlreadyTrue
-  //       ? allFalse
-  //       : { ...allFalse, [key]: true }
-  //   })
-  // }
-  // const progress = {
-  //   "data": [
-  //     {
-  //       "label": "Venue",
-  //       "status": null,
-  //       "date": null,
-  //       "action": "update_venue"
-  //     },
-  //     {
-  //       "label": "Tasting",
-  //       "status": null,
-  //       "date": null
-  //     },
-  //       {
-  //       "label": "Menu",
-  //       "status": null,
-  //       "date": null
-  //     },
-  //     {
-  //       "label": "Quote",
-  //       "status": null,
-  //       "date": null
-  //     },
-  //     {
-  //       "label": "Contract",
-  //       "status": null,
-  //       "date": null
-  //     },
-  //     {
-  //       "label": "Invites",
-  //       "status": null,
-  //       "date": null
-  //     },
-  //     {
-  //       "label": "Ingredients",
-  //       "status": null,
-  //       "date": null
-  //     },
-  //     {
-  //       "label": "Production",
-  //       "status": null,
-  //       "date": null
-  //     },
-  //       {
-  //       "label": "Delivery",
-  //       "status": null,
-  //       "date": null
-  //     }
-  //   ]
-  // }
-  
-  
 
 // Methods
   // Modal toggle

@@ -253,13 +253,11 @@ const progress = {
             <Row>
               <Col>
                 { progress_obj?.venue && (
-                  <ProgressVenue event={event} />
+                  <ProgressVenue event={event} onUpdate={updateEvent} />
                 )}
 
                 { progress_obj?.menu && (
-                  <ProgressMenu event={event} onUpdateEvent={updateEvent} parentData={() => {
-                    return true
-                  }} />
+                  <ProgressMenu event={event} onUpdate={updateEvent} />
                 )}
                 { progress_obj?.quote && (
                   <ProgressQuote event={event} />

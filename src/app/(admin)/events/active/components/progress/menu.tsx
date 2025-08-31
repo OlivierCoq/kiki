@@ -14,7 +14,7 @@ import {
 import ChoicesFormInput from '@/components/form/ChoicesFormInput'
 
 // Types
-import { Dish, Menu, Summary } from '@/types/event'
+import { Dish, Menu, Summary, Event } from '@/types/event'
 
 // Helpers
 import updateNestedValue from '@/helpers/NestedFields'
@@ -26,7 +26,13 @@ interface EventMenuProps {
   parentData: any;
   onUpdateEvent: (newEvent: Event) => void
 }
-const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenuProps) => {
+const ProgressMenu = ({
+  event,
+  onUpdate,
+}: {
+  event: Event
+  onUpdate: (event: Event) => void
+}) => {
 
   console.log('Edit Menu here...', event?.menu)
 
@@ -40,7 +46,7 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
   useEffect(() => {
     setLoadingMenu(true)
     try {
-      fetch(`/api/menus/${event?.menu?.id}`)
+      fetch(`/api/menus/${event?.menu}`)
         .then(async(data)=> {
           const new_menu = await data.json()
           // console.log('whaaaaa', new_menu)
@@ -74,7 +80,7 @@ const ProgressMenu = ({ event, parentData, onUpdateEvent = () => {} }: EventMenu
         const event_update = await data.json()
         
         console.log('event update', event_update)
-        onUpdateEvent(event_update?.event)
+        onUpdate(event_update?.event)
      })
   }
   
