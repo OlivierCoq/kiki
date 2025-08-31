@@ -7,30 +7,30 @@ const supabase = createClient(process?.env?.NEXT_PUBLIC_SUPABASE_URL!, process?.
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) { 
 
 
-  const customerId = Number(params.id)
+  const venueId = Number(params.id)
   // const body = { venue: 2 }
 
 
   // Optionally validate input
-  if (!customerId) {
-    return NextResponse.json({ error: 'Missing customer ID or body' }, { status: 400 })
+  if (!venueId) {
+    return NextResponse.json({ error: 'Missing venue ID or body' }, { status: 400 })
   }
 
   try {
     // Fetch the menu by ID
-    const { data: customer, error: customerError } = await supabase
-      .from('customers')
+    const { data: venue, error: venueError } = await supabase
+      .from('venues')
       .select('*')
-      .eq('id', customerId)
+      .eq('id', venueId)
       .single()
 
-    if (customerError) {
-      throw customerError
+    if (venueError) {
+      throw venueError
     }
 
-    return NextResponse.json({ customer }, { status: 200 })
+    return NextResponse.json({ venue }, { status: 200 })
   } catch (error) {
-    console.error('Error fetching customer: ', error)
+    console.error('Error fetching venue: ', error)
     return NextResponse.json({ error: 'Failed to fetch menu or dishes' }, { status: 500 })
   }
 }

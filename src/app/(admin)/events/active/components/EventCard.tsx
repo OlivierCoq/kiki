@@ -23,17 +23,13 @@ import {
   ModalBody, 
   ModalFooter, 
   ModalHeader, 
-  ModalTitle,  
-  Accordion, 
-  AccordionBody,
-  AccordionHeader, 
-  AccordionItem } from 'react-bootstrap'
+  ModalTitle } from 'react-bootstrap'
     // Modal
-  import useToggle from '@/hooks/useToggle'
+import useToggle from '@/hooks/useToggle'
 
   // App
 import EventModalBody from './modal/base'
-
+import CostomerPanel from './customer'
 
   // Interfaces + Types
 import { Event } from '@/types/event'
@@ -43,11 +39,12 @@ import { useEvents } from "@/context/useEventsContext"
 
 export interface EventCardProps {
   event: Event;
-//  onUpdate: (event: Event) => void
+  onUpdate: (event: Event) => void
 //  onDelete: () => void; // Callback function to handle deletion
 }
 const EventCard = ({ event }: { event: Event }) => {
 
+    // Keep context up-to-date:
   const { updateEvent } = useEvents()
 
     // Derived field: total cost
@@ -192,14 +189,11 @@ const EventCard = ({ event }: { event: Event }) => {
               <IconifyIcon icon="bx-restaurant" fontSize='20' />
             </Button>
             <Modal show={isTrue} onHide={toggle} size='xl'> 
-                <ModalHeader closeButton>
-                  <ModalTitle>{event.name}</ModalTitle>
-                </ModalHeader>
-                <ModalBody>
-
-
-
-
+              <ModalHeader closeButton>
+                <ModalTitle>{event.name}</ModalTitle>
+              </ModalHeader>
+              <ModalBody>
+                <EventModalBody event={event} onUpdate={updateEvent} />
               </ModalBody>
             </Modal>
 
@@ -245,6 +239,9 @@ const EventCard = ({ event }: { event: Event }) => {
             </Modal>
 
           </CardBody>
+          <CardFooter className="text-muted">
+            <small>Created: {new Date(event.created_at).toLocaleDateString()}</small>
+          </CardFooter>
         </Card>
       </Col>
     </>
