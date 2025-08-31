@@ -82,6 +82,7 @@ const SummaryPanel = ({
 
     const data = await res.json()
     console.log('updated event', data)
+    onUpdate(data?.event)
     await toggleSummaryPosting(false)
     toggleSummaryEdit()
     // return data
