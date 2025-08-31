@@ -36,7 +36,11 @@ import updateNestedValue from '@/helpers/NestedFields'
   // Interfaces + Types
 import { Event } from '@/types/event'
 
+    // Event context
+  import { useEvent } from "../components/EventCard"
+
 export interface summaryPanelProps {
+  totalCost: number;
   event: Event;
   onUpdate: (event: Event) => void
 //  onDelete: () => void; // Callback function to handle deletion
@@ -56,7 +60,10 @@ const SummaryPanel = ({
   const toggleSummary = () => { toggleSummaryPosting(!summaryPosting) }
   const toggleSummaryEdit = () => { toggleEditSummary(!editSummary) }
 
-  
+  // Summary context
+  const { totalCost, totalRevenue } = useEvent()
+
+
   // Methods
   const editEventSummary = async () => {
     console.log('editEventSummary')
@@ -90,105 +97,103 @@ const SummaryPanel = ({
   
   return (
     <>
+      <Card className='bg-light h-100'>
+        <CardBody>
+          <CardTitle className="text-lg font-semibold mb-2">
+            Summary &nbsp;
+            <a href="#" className="text-primary cursor-hover" onClick={toggleSummaryEdit}>
+              <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" />
+            </a>
+          </CardTitle>
+          
+          { !editSummary && 
+            <div className='fade-in'>
+              <Row className='mb-3'>
+                <Col>
+                  <h5 className='mb-1'>Total Guests</h5>
+                  <p className='mb-0'>{ summary?.production?.total_guests }</p>
+                </Col>
+                <Col>
+                  <h5 className='mb-1'>Total Cost</h5>
+                  <p className='mb-0'>{ formatCurrency(event?.default_currency, totalCost) }</p>
+                </Col>
+                {/* <Col>
+                  <h5 className='mb-1'>Price per Person</h5>
+                  <p className='mb-0'>{ formatCurrency(summary?.production?.price_per_person) }</p>
+                  
+                </Col> */} 
+              </Row>
+              <Row className='mb-3'>
+                
+                <Col>
+                  <h5 className='mb-1'>Total Revenue</h5>
+                  <p className='mb-0'>{ formatCurrency(event?.default_currency, totalRevenue) }</p>
+                </Col>
+                {/* <Col>
+                  <h5 className='mb-1'>Total Profit</h5>
+                  <p className='mb-0'>{ formatCurrency(summary?.total_profit) }</p>
+                </Col> */}
+              </Row>
+            </div>
+          }
 
-<Card className='bg-light h-100'>
-    <CardBody>
-      <CardTitle className="text-lg font-semibold mb-2">
-        Summary &nbsp;
-        <a href="#" className="text-primary cursor-hover" onClick={toggleSummaryEdit}>
-          <IconifyIcon icon="bx-edit" fontSize='20' className="me-2 text-primary cursor-hover" />
-        </a>
-      </CardTitle>
-      
-      { !editSummary && 
-        <div className='fade-in'>
-          <Row className='mb-3'>
-            <Col>
-              <h5 className='mb-1'>Total Guests</h5>
-              <p className='mb-0'>{ summary?.production?.total_guests }</p>
-            </Col>
-            <Col>
-              <h5 className='mb-1'>Total Cost</h5>
-              <p className='mb-0'>{ formatCurrency(event?.default_currency, summary?.total_cost) }</p>
-            </Col>
-            {/* <Col>
-              <h5 className='mb-1'>Price per Person</h5>
-              <p className='mb-0'>{ formatCurrency(summary?.production?.price_per_person) }</p>
-              
-            </Col> */} 
-          </Row>
-          <Row className='mb-3'>
-            
-            <Col>
-              <h5 className='mb-1'>Total Revenue</h5>
-              <p className='mb-0'>{ formatCurrency(event?.default_currency, summary?.total_revenue) }</p>
-            </Col>
-            {/* <Col>
-              <h5 className='mb-1'>Total Profit</h5>
-              <p className='mb-0'>{ formatCurrency(summary?.total_profit) }</p>
-            </Col> */}
-          </Row>
-        </div>
-      }
+          {
+            editSummary && 
+            <div>
+              <Row>
+                <Col className='me-1 mb-2 p-0'>
+                  <label htmlFor="total_guests">Total Guests</label>
+                  {/* onChange={(e) => { updateNestedValue('start_time', e.target.value, setNewEvent) }} */}
+                  <input type="number" id="total_guests" className="form-control" defaultValue={summary?.production?.total_guests} 
+                    onChange={(e) => { updateNestedValue('production.total_guests', e.target.value, setSummary) }}
+                  />
+                </Col>
+                <Col className='m-0 p-0'>
+                  {/* <label htmlFor="price_per_person">Price per Person</label>
+                  <input type="number" disabled id="price_per_person" className="form-control" defaultValue={summary?.production?.price_per_person} /> */}
+                  <label htmlFor="total_cost">Total Cost</label>
+                  <input type="number" disabled id="total_cost" className="form-control" defaultValue={summary?.total_cost} />
+                </Col>
+              </Row>
+              <Row>
+                <Col className='me-1 mb-2 p-0'>
+                  <label htmlFor="total_revenue">Total Revenue</label>
+                  <input type="number" disabled id="total_revenue" className="form-control" defaultValue={summary?.total_revenue} />
+                </Col>
+                <Col className='m-0 p-0'>
+                  
+                </Col>
+              </Row>
+              <Row className='mb-3'>
+                <Col md={6}></Col>
+                <Col md={6}>
+                  <div className="d-flex fex-row justify-content-end">
 
-      {
-        editSummary && 
-        <div>
-          <Row>
-            <Col className='me-1 mb-2 p-0'>
-              <label htmlFor="total_guests">Total Guests</label>
-              {/* onChange={(e) => { updateNestedValue('start_time', e.target.value, setNewEvent) }} */}
-              <input type="number" id="total_guests" className="form-control" defaultValue={summary?.production?.total_guests} 
-                onChange={(e) => { updateNestedValue('production.total_guests', e.target.value, setSummary) }}
-              />
-            </Col>
-            <Col className='m-0 p-0'>
-              {/* <label htmlFor="price_per_person">Price per Person</label>
-              <input type="number" disabled id="price_per_person" className="form-control" defaultValue={summary?.production?.price_per_person} /> */}
-              <label htmlFor="total_cost">Total Cost</label>
-              <input type="number" disabled id="total_cost" className="form-control" defaultValue={summary?.total_cost} />
-            </Col>
-          </Row>
-          <Row>
-            <Col className='me-1 mb-2 p-0'>
-              <label htmlFor="total_revenue">Total Revenue</label>
-              <input type="number" disabled id="total_revenue" className="form-control" defaultValue={summary?.total_revenue} />
-            </Col>
-            <Col className='m-0 p-0'>
-              
-            </Col>
-          </Row>
-          <Row className='mb-3'>
-            <Col md={6}></Col>
-            <Col md={6}>
-              <div className="d-flex fex-row justify-content-end">
+                    { 
+                      summaryPosting ? <IconifyIcon fontSize='10' icon="mdi:loading" className="spinner-border text-primary text-sm" />
+                      :
 
-                { 
-                  summaryPosting ? <IconifyIcon fontSize='10' icon="mdi:loading" className="spinner-border text-primary text-sm" />
-                  :
+                      <button className='rounded btn' onClick={editEventSummary}>
+                        <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
+                      </button>
+                    }
+                  </div>
+                </Col>
+              </Row>  
+              <Row className='mb-3'>
+                <Col>
+                  <h5 className='mb-1'>Total Profit</h5>
+                  <p className='mb-0'>{ formatCurrency(event?.default_currency, event?.summary?.total_profit) }</p>
+                </Col>
+              </Row>
+            </div> 
+          }
+          
+        </CardBody>
+      <CardFooter>
 
-                  <button className='rounded btn' onClick={editEventSummary}>
-                    <IconifyIcon icon="bx-check" fontSize='20' className='text-success cursor-hover' />
-                  </button>
-                }
-              </div>
-            </Col>
-          </Row>  
-          <Row className='mb-3'>
-            <Col>
-              <h5 className='mb-1'>Total Profit</h5>
-              <p className='mb-0'>{ formatCurrency(event?.default_currency, event?.summary?.total_profit) }</p>
-            </Col>
-          </Row>
-        </div> 
-      }
-      
-    </CardBody>
-    <CardFooter>
-
-    </CardFooter>
-  </Card>
-
+        </CardFooter>
+      </Card>
     </>
   )
 }

@@ -184,6 +184,7 @@ const ProgressMenu = ({
               
               setPostingNewDish(false)
               setAddingDish(false)
+              onUpdate(event)
             })
         })
     }
@@ -255,6 +256,7 @@ const ProgressMenu = ({
 
               setUpdating(false)
               setPosting(false)
+              onUpdate(event)
             })
             .catch((err)=> {
               console.log('error updating menu: ', err)

@@ -1,6 +1,6 @@
 'use client'
 // React + Next.js
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useMemo } from "react"
 import { produce } from "immer"
 import Link from 'next/link'
 
@@ -27,9 +27,27 @@ import useToggle from '@/hooks/useToggle'
   // App
 import EventModalBody from './modal/base'
   // Interfaces + Types
-import { Event } from '@/types/event'
+import { Event, Dish } from '@/types/event'
   // Data
+    // Events
 import { useEvents } from "@/context/useEventsContext"
+    // Summary
+type EventContextType = {
+  menuItems: Dish[]
+  setMenuItems: React.Dispatch<React.SetStateAction<Dish[]>>
+  totalCost: number
+  totalRevenue: number
+}
+
+const EventContext = createContext<EventContextType | null>(null)
+
+export const useEvent = () => {
+  const ctx = useContext(EventContext)
+  if (!ctx) throw new Error("useEvent must be used inside <EventProvider>")
+  return ctx
+}
+
+
 
 
 export interface EventCardProps {
@@ -39,15 +57,40 @@ export interface EventCardProps {
 }
 const EventCard = ({ event }: { event: Event }) => {
 
-    // Keep context up-to-date:
-  const { updateEvent } = useEvents()
+  const [menuItems, setMenuItems] = useState<Dish[]>([])
 
-    // Derived field: total cost
-  // const totalCost = event.menu?.items?.reduce((sum, i) => sum + i.price * i.quantity, 0) ?? 0
+  const totalCost = useMemo(
+    () => menuItems?.reduce(
+        (sum: number, item: any) => sum + (item.quantity * item.cost),
+        0
+      ),
+    [menuItems]
+  )
 
+  const totalRevenue = useMemo(
+    () => menuItems?.reduce(
+        (sum: number, item: any) => sum + (item.quantity * item.price),
+        0
+      ),
+    [menuItems]
+  )
 
+  useEffect(()=> {
+
+    if(event) {
+      fetch(`/api/menus/${event?.menu}`)
+        .then(async (data) => {
+          const res = await data.json()
+          // console.log('fml', res?.menu?.dishes?.data)
+          setMenuItems(res?.menu?.dishes?.data)
+        })
+    }
+  }, [])
+  
 
 // Methods
+    // Keep context up-to-date:
+  const { updateEvent } = useEvents()
   // Modal toggle
   const { isTrue, toggle } = useToggle()
   // Delete
@@ -58,6 +101,7 @@ const EventCard = ({ event }: { event: Event }) => {
 
   return (
     <>
+    <EventContext.Provider value={{ menuItems, setMenuItems, totalCost, totalRevenue }}>
       <Col md={3} className='fade-in'>
         <Card className="h-full" style={{ height: '14rem' }}>
           <CardBody>
@@ -124,6 +168,8 @@ const EventCard = ({ event }: { event: Event }) => {
           </CardFooter>
         </Card>
       </Col>
+    </EventContext.Provider>
+
     </>
   )
 }

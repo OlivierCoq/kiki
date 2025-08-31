@@ -225,7 +225,7 @@ const progress = {
               </Col>
                 {/* Summary */}
               <Col md={4} className='h-auto'>
-                <SummaryPanel event={event} onUpdate={updateEvent} />
+                <SummaryPanel event={event} onUpdate={updateEvent}  />
               </Col>
             </Row>
             <div className="mt-4">
