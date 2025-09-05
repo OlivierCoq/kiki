@@ -37,7 +37,9 @@ import updateNestedValue from '@/helpers/NestedFields'
 import { Event } from '@/types/event'
 
     // Event context
-  import { useEvent } from "../components/EventCard"
+// Context
+import { useEvent } from "@/context/useEventContext";
+
 
 export interface summaryPanelProps {
   totalCost: number;
@@ -60,7 +62,7 @@ const SummaryPanel = ({
   const toggleSummary = () => { toggleSummaryPosting(!summaryPosting) }
   const toggleSummaryEdit = () => { toggleEditSummary(!editSummary) }
 
-  // Summary context
+  // Summary data from the useEvent context
   const { totalCost, totalRevenue } = useEvent()
 
 

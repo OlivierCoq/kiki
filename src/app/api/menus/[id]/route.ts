@@ -73,7 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     // }
     menuObj = menu
     // menuObj.dishes.forEach((d: any) => { return JSONBig.parse(d) })
-    console.log('heyyyyy', menuObj.dishes)
+    // console.log('heyyyyy', menuObj.dishes)
     // menuObj.dishes = dishes || []
     // console.log('here we go', menuObj, menuObj.dishes, dishes)
 // JSONBig.parse(JSONBig.stringify(square_response))

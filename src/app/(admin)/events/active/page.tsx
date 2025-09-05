@@ -19,6 +19,9 @@ import { Event } from '@/types/event'
 import { NewEventInterface } from './components/NewEventInterface'
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 
+// Context
+import { useEvent, EventProvider } from "@/context/useEventContext";
+
 
 const ActiveEventsPage = () => {
 
@@ -29,7 +32,7 @@ const ActiveEventsPage = () => {
   const { events, fetchEvents } = useEvents()
   console.log('Events', events)
   const [loading, setLoading] = useState(!events || events.length === 0) // Set loading to true if events is null or empty
-  const [mainEvent, setMainEvent] = useState<any>(null)
+  // const [mainEvent, setMainEvent] = useState<any>(null)
 
 
 
@@ -48,7 +51,7 @@ const ActiveEventsPage = () => {
     } else { setLoading(false) }
   }, [])
 
-  console.log('Events:', events)
+  // console.log('Events:', events)
 
   const handleNewEvent = (ev: any) => {
     console.log('New event created', ev)
@@ -89,8 +92,14 @@ const ActiveEventsPage = () => {
       {/* <NewEventInterface onNewEvent={handleNewEvent} />  */}
       <Col md={12}>
         <Row>
-        {(events?.length > 0) && !loading ? (
-            events?.map((event: Event) => event.active && ( <EventCard  key={event.id} event={event} /> ))
+        {(events && events?.length > 0) && !loading ? (
+            events?.map((event: Event) => event?.active && event?.id && ( 
+
+              <EventProvider key={event.id} event={event}>
+                <EventCard  key={event.id} event={event} /> 
+              </EventProvider>
+          
+          ))
           ) : (
             <Col>
              { loading ? 

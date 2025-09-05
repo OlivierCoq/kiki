@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { produce } from "immer"
 const EventsContext = createContext<any>(null)  
+import {Event} from '@/types/event'
 
 export function EventsProvider({ children }: { children: React.ReactNode }) {
 
@@ -24,8 +25,10 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateEvent = (updatedEvent: Event) => {
+    console.log('Updating event...')
     setEvents(prev =>
       produce(prev, draft => {
+        if (!draft) return
         const index = draft?.findIndex(e => e.id === updatedEvent?.id)
         if (index !== -1) draft[index] = updatedEvent
       })

@@ -31,24 +31,6 @@ import { Event, Dish } from '@/types/event'
   // Data
     // Events
 import { useEvents } from "@/context/useEventsContext"
-    // Summary
-type EventContextType = {
-  menuItems: Dish[]
-  setMenuItems: React.Dispatch<React.SetStateAction<Dish[]>>
-  totalCost: number
-  totalRevenue: number
-}
-
-const EventContext = createContext<EventContextType | null>(null)
-
-export const useEvent = () => {
-  const ctx = useContext(EventContext)
-  if (!ctx) throw new Error("useEvent must be used inside <EventProvider>")
-  return ctx
-}
-
-
-
 
 export interface EventCardProps {
   event: Event;
@@ -57,35 +39,6 @@ export interface EventCardProps {
 }
 const EventCard = ({ event }: { event: Event }) => {
 
-  const [menuItems, setMenuItems] = useState<Dish[]>([])
-
-  const totalCost = useMemo(
-    () => menuItems?.reduce(
-        (sum: number, item: any) => sum + (item.quantity * item.cost),
-        0
-      ),
-    [menuItems]
-  )
-
-  const totalRevenue = useMemo(
-    () => menuItems?.reduce(
-        (sum: number, item: any) => sum + (item.quantity * item.price),
-        0
-      ),
-    [menuItems]
-  )
-
-  useEffect(()=> {
-
-    if(event) {
-      fetch(`/api/menus/${event?.menu}`)
-        .then(async (data) => {
-          const res = await data.json()
-          // console.log('fml', res?.menu?.dishes?.data)
-          setMenuItems(res?.menu?.dishes?.data)
-        })
-    }
-  }, [])
   
 
 // Methods
@@ -101,7 +54,6 @@ const EventCard = ({ event }: { event: Event }) => {
 
   return (
     <>
-    <EventContext.Provider value={{ menuItems, setMenuItems, totalCost, totalRevenue }}>
       <Col md={3} className='fade-in'>
         <Card className="h-full" style={{ height: '14rem' }}>
           <CardBody>
@@ -168,8 +120,6 @@ const EventCard = ({ event }: { event: Event }) => {
           </CardFooter>
         </Card>
       </Col>
-    </EventContext.Provider>
-
     </>
   )
 }

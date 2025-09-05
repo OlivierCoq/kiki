@@ -3,7 +3,6 @@ export type VenueImage = {
   url: string
 }
 
-
 export type Venue = {
   id: number
   address: string
@@ -43,22 +42,20 @@ export type Dish = {
   updating: boolean
 }
 
-
-
 export type Menu = {
-    archived: boolean
-    created_at: string
-    description: string
-    dishes: string[] | Dish[] | null
-    id: number
-    is_public: boolean
-    name: string
-    packages: {
-      data: number[]
-    }
-    price_per_person: number
-    tags: string[]
+  archived: boolean
+  created_at: string
+  description: string
+  dishes: string[] | Dish[] | null
+  id: number
+  is_public: boolean
+  name: string
+  packages: {
+    data: number[]
   }
+  price_per_person: number
+  tags: string[]
+}
 
 export type Summary = {
   production: {
@@ -72,6 +69,7 @@ export type Summary = {
 }
 
 export type Event = {
+  id: number | null
   active: boolean
   created_at: string
   customer: {
@@ -107,7 +105,6 @@ export type Event = {
   }
   date: string
   end_time: string
-  id: number
   menu: Menu,
   name: string
   notes: string

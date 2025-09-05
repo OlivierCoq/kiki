@@ -20,6 +20,10 @@ import { Dish, Menu, Summary, Event } from '@/types/event'
 import updateNestedValue from '@/helpers/NestedFields'
 import formatCurrency from '@/helpers/FormatCurrency'
 
+// Context
+import { useEvent } from "@/context/useEventContext";
+
+
 
 interface EventMenuProps {
   event: any;
@@ -36,11 +40,17 @@ const ProgressMenu = ({
 
   console.log('Edit Menu here...', event?.menu)
 
+  // Context
+
   // Main Menu
     // State
   const [menu, setMenu] = useState<any>(null)
   const [loadingMenu, setLoadingMenu] = useState<boolean>(true) 
   const [postingMenu, setPostingMenu] = useState<boolean>(false) 
+  
+    // Context
+  const { menuItems, setMenuItems } = useEvent();
+  // console.log('E: ', menuItems)
     // Methods
       // fetch main menu
   useEffect(() => {
@@ -143,7 +153,14 @@ const ProgressMenu = ({
     tags: [],
     updating: false
   })
-  const update_quantity = async (dish: Dish, newQuantity: number) => {}
+  const update_quantity = async (dish: Dish, newQuantity: number) => {
+
+    setMenuItems((prev: Dish[]) =>
+      prev.map(d =>
+        d.id === dish.id ? { ...d, quantity: newQuantity } : d
+      )
+    )
+  }
   const confirmAddDish = async () => {
     setPostingNewDish(true)
     // Validate:
@@ -398,6 +415,7 @@ const ProgressMenu = ({
           <input
             type='number'
             className='form-control'
+            value={dishItem?.quantity}
             onChange={(e) => { 
               update_quantity(dishItem, Number(e.target.value))
              }}
@@ -463,7 +481,7 @@ const ProgressMenu = ({
         }
 
         {
-          menu && menu?.dishes?.data?.length && !newMenu && 
+          menu && menuItems?.length && !newMenu && 
 
           <Row className='m-3'>
             <Col>
@@ -475,7 +493,7 @@ const ProgressMenu = ({
                 <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}>
                   {/* List menu items: */}
                   <ul className="list-unstyled">
-                    {menu?.dishes?.data?.map((dish: Dish) => (
+                    {menuItems?.map((dish: Dish) => (
                       <DishItem key={dish?.id} dish={dish} onDishUpdate={updatedDish => {
                           
                           // Optionally, call your API here to update the summary in the DB
