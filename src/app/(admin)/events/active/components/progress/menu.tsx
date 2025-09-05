@@ -2,6 +2,8 @@
 // React
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import debounce from 'lodash.debounce'
+
 
 // Icons
 import IconifyIcon from '@/components/wrappers/IconifyIcon'
@@ -153,6 +155,25 @@ const ProgressMenu = ({
     tags: [],
     updating: false
   })
+
+  const saveQuantity = async (dish: Dish, quantity: number) => {
+
+    let menuObj = menu
+
+    menuObj.dishes.data = menuItems
+
+    try {
+      await fetch(`/api/menus/update/${dish?.menu}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(menuObj),
+      });
+    } catch (err) {
+      console.error('Failed to save quantity:', err);
+    }
+  }
+  const debouncedSaveQuantity = debounce(saveQuantity, 500)
+
   const update_quantity = async (dish: Dish, newQuantity: number) => {
 
     setMenuItems((prev: Dish[]) =>
@@ -160,6 +181,7 @@ const ProgressMenu = ({
         d.id === dish.id ? { ...d, quantity: newQuantity } : d
       )
     )
+    debouncedSaveQuantity(dish, newQuantity)
   }
   const confirmAddDish = async () => {
     setPostingNewDish(true)
