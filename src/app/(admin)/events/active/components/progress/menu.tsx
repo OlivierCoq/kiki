@@ -415,7 +415,6 @@ const ProgressMenu = ({
           <input
             type='number'
             className='form-control'
-            value={dishItem?.quantity}
             onChange={(e) => { 
               update_quantity(dishItem, Number(e.target.value))
              }}
