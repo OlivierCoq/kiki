@@ -1,4 +1,5 @@
 // EventContext.tsx
+'use client'
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 
 import { Event, Dish, Menu } from '@/types/event'

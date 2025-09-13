@@ -22,7 +22,11 @@ import { Event, Venue, ProgressEventStep, VenueImage, Summary, Dish } from '@/ty
    // Forms
 import { USStates } from '@/assets/data/us-states'
 import { worldCountries } from '@/assets/data/world-countries'
-import ChoicesFormInput from '@/components/form/ChoicesFormInput'
+import dynamic from 'next/dynamic'
+const ChoicesFormInput = dynamic(
+  () => import('@/components/form/ChoicesFormInput'),
+  { ssr: false }
+)
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 // Components
 

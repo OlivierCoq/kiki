@@ -13,7 +13,12 @@ import {
   Row,
   Card
 } from 'react-bootstrap'
-import ChoicesFormInput from '@/components/form/ChoicesFormInput'
+
+import dynamic from 'next/dynamic'
+const ChoicesFormInput = dynamic(
+  () => import('@/components/form/ChoicesFormInput'),
+  { ssr: false }
+)
 
 // Types
 import { Dish, Menu, Summary, Event } from '@/types/event'

@@ -14,7 +14,7 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
     const res = await fetch('/api/events')
     const data = await res.json()
     // console.log('CONTEXT!!!!!', data)
-    setEvents(data)
+    setEvents(data?.data)
   }
 
   const fetchVenues = async () => {

@@ -1,4 +1,5 @@
 // React
+  
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 // Bootstrap
@@ -17,7 +18,12 @@ import { Venue } from '@/types/event'
 import { useEvents } from '@/context/useEventsContext'
 // UI
 import ComponentContainerCard from '@/components/ComponentContainerCard'
-import ChoicesFormInput from '@/components/form/ChoicesFormInput'
+// Fix that ssr issue with ChoicesFormInput
+import dynamic from 'next/dynamic'
+const ChoicesFormInput = dynamic(
+  () => import('@/components/form/ChoicesFormInput'),
+  { ssr: false }
+)
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 import { USStates } from '@/assets/data/us-states'
 import { worldCountries } from '@/assets/data/world-countries'

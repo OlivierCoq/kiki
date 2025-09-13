@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 
+
 //Events
 import { useEvents } from '@/context/useEventsContext'
 import  EventCard  from './components/EventCard'
@@ -81,7 +82,6 @@ const ActiveEventsPage = () => {
       console.error('Error refreshing events list:', error)
     })
   }
-
 
   return (
     <Row>

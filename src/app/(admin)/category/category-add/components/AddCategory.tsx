@@ -1,5 +1,9 @@
 'use client'
-import ChoicesFormInput from '@/components/form/ChoicesFormInput'
+import dynamic from 'next/dynamic'
+const ChoicesFormInput = dynamic(
+  () => import('@/components/form/ChoicesFormInput'),
+  { ssr: false }
+)
 import TextAreaFormInput from '@/components/form/TextAreaFormInput'
 import TextFormInput from '@/components/form/TextFormInput'
 import { yupResolver } from '@hookform/resolvers/yup'

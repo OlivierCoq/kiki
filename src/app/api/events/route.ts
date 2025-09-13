@@ -23,9 +23,12 @@ export async function GET() {
     if (error) {
       throw error
     } else {
-      console.log('Fetched events raw:', data)
+      // console.log('Fetched events raw:', data)
 
-      return NextResponse.json(data)
+      return NextResponse.json({
+        message: 'Events fetched successfully',
+        data
+      }, { status: 200 })
     }
   } catch (error) {
     console.error('Error fetching events:', error)
