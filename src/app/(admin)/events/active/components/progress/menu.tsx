@@ -153,7 +153,7 @@ const ProgressMenu = ({
     name: '',
     category: '',
     description: '',
-    menu: event?.menu?.id,
+    menu: event?.menu,
     position: 0,
     price: 0,
     quantity: 0,
@@ -164,8 +164,8 @@ const ProgressMenu = ({
   const saveQuantity = async (dish: Dish, quantity: number) => {
 
     let menuObj = menu
-
-    menuObj.dishes.data = menuItems
+    console.group('saveQuantity', dish, quantity)
+    menuObj.dishes = menuItems
 
     try {
       await fetch(`/api/menus/update/${dish?.menu}`, {
@@ -209,9 +209,9 @@ const ProgressMenu = ({
           
           let menuObj = menu
 
-          menuObj.dishes.data.push(new_dish_obj?.dish)
-
-          await fetch(`/api/menus/update/${event?.menu?.id}`, {
+          menuObj?.dishes?.push(new_dish_obj?.dish)
+          console.log('updating menu dishes: ', menuObj.dishes.data)
+          await fetch(`/api/menus/update/${event?.menu}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json'
@@ -573,7 +573,7 @@ const ProgressMenu = ({
                           <IconifyIcon icon="bx:plus" className="m-2 cursor-pointer" fontSize={15}    />
                         </button>
                         <IconifyIcon 
-                          icon="bx:check"
+                          icon={ postingNewDish ? "mdi:loading" : "bx:check"}
                           className={(!newDish.name && postingNewDish) ? "mb-4 text-neutral" : "mb-4 text-success cursor-pointer"}
                           fontSize={20} 
                           onClick={() => confirmAddDish()}   />

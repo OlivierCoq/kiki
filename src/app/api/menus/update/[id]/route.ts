@@ -18,8 +18,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const body = await req.json();
   const { id, packages, name, description, tags, is_public, archived, dishes } = body;
 
-  console.log('Request body:', body);
-  console.log('body', body)
+  console.log('Request body for updating menu:', body?.dishes?.data);
+  // console.log('body', body)
 
 
   if (!body?.id || !body) {
