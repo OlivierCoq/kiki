@@ -229,6 +229,11 @@ const ProgressMenu = ({
               setPostingNewDish(false)
               setAddingDish(false)
               onUpdate(event)
+
+
+              // push to menuItems in UI as well:
+              setMenuItems((prev: Dish[]) => [...prev, new_dish_obj?.dish] )
+              // setMenu(updated_menu_data?.menu)
             })
         })
     }
