@@ -266,7 +266,7 @@ const progress = {
                   <ProgressContract event={event} />
                 )}
                 { progress_obj?.invites && (
-                  <ProgressInvites event={event} />
+                  <ProgressInvites event={event} onUpdateEvent={updateEvent} />
                 )}
                 { progress_obj?.ingredients && (
                   <ProgressIngredients event={event} />
