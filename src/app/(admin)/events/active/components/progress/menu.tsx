@@ -29,6 +29,7 @@ import formatCurrency from '@/helpers/FormatCurrency'
 
 // Context
 import { useEvent } from "@/context/useEventContext";
+import { update } from 'lodash'
 
 
 
@@ -178,6 +179,11 @@ const ProgressMenu = ({
   const debouncedSaveQuantity = debounce(saveQuantity, 500)
 
   const update_quantity = async (dish: Dish, newQuantity: number) => {
+
+    // if BEO status is confirmed, change to in_progress
+    if(event?.progress?.data[1]?.status === 'confirmed') {
+      updateBEOStatus('in_progress')
+    }
 
     setMenuItems((prev: Dish[]) =>
       prev.map(d =>
@@ -456,15 +462,6 @@ const ProgressMenu = ({
         <div className=''>
           {/* Number */}
           <label>Quantity</label>
-          {/* <input
-            type='number'
-            className='form-control'
-            onChange={(e) => { 
-              update_quantity(dishItem, Number(e.target.value))
-             }}
-            value={dishItem?.quantity}
-            onFocus={e => e.target.select()}
-          /> */}
           <input
             id={`quantity-input-${dishItem?.id}`}
             type='number'
@@ -482,9 +479,39 @@ const ProgressMenu = ({
     )
   })
 
+  const [postingBeoStatus, setPostingBeoStatus] = useState<boolean>(false)
+  const updateBEOStatus = async (status: string) => {
+      // for ui 
+    setPostingBeoStatus(true)
+
+    const progress_obj = event?.progress
+    ? { ...event.progress, data: [...event.progress.data] }
+    : { data: [] }
+
+    if (progress_obj.data[1]) {
+      progress_obj.data[1] = { ...progress_obj.data[1], status, date: new Date().toISOString() }
+    }
+
+
+    await fetch(`/api/events/update/${event?.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: event?.id, progress: progress_obj })
+    })
+      .then(async (data) => {
+        const event_update = await data.json()
+        console.log('event update', event_update)
+        onUpdate(event_update?.event)
+        setPostingBeoStatus(false)
+      })
+
+  }
+
   return (
     <>
-      <div className="">
+    
 
       {
         loadingMenu &&
@@ -543,8 +570,7 @@ const ProgressMenu = ({
                   <h4 className='mb-2'>Menu: {menu.name}</h4>
                   <p>{menu.description}</p>
                 </Card.Header>
-                {/* <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}> */}
-                <Card.Body>
+                <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}>
                   {/* List menu items: */}
                   <ul className="list-unstyled">
                     {menuItems?.map((dish: Dish) => (
@@ -611,12 +637,19 @@ const ProgressMenu = ({
                     </div>
                   }
 
-                  <div className="d-flex flex-row justify-content-end">
+                  <div className="d-flex flex-column justify-content-end align-items-end w-25 ms-auto">
                     <button 
-                      className="btn btn-primary"
+                      className="btn btn-primary mb-2"
                       onClick={() => { setAddingDish(true)}}
                     >
                       Add dish
+                    </button>
+                    <button 
+                      className="btn btn-success"
+                      onClick={() => { updateBEOStatus('confirmed') }}
+                      disabled={postingBeoStatus || event?.progress?.data[1]?.status === 'confirmed'}
+                    >
+                      Complete BEO
                     </button>
                   </div>
                   
@@ -627,7 +660,7 @@ const ProgressMenu = ({
           </Row>
         }
 
-      </div>
+
     </>
   )
  }
