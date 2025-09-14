@@ -104,7 +104,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           "date": new Date().toISOString()
       },
       {
-          "label": "Menu",
+          "label": "BEO",
           "status": null,
           "date": null
       },

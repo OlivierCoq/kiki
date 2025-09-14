@@ -1,6 +1,6 @@
 'use client'
 // React
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, memo } from 'react'
 import Link from 'next/link'
 import debounce from 'lodash.debounce'
 
@@ -132,15 +132,13 @@ const ProgressMenu = ({
     archived: false,
     name: '',
     description: '',
-    dishes: {
-      data: []
-    },
+    dishes: [],
     is_public: true,
     packages: {
       data: []
     },
     price_per_person: 0,
-    tags: []
+    tags: [] 
   })
     // Methods
 
@@ -244,14 +242,28 @@ const ProgressMenu = ({
   }
 
   // Dish item sub-component
-  const DishItem = ({ dish, onDishUpdate }: DishItemProps) => {
+  const DishItem = memo(({ dish, onDishUpdate }: DishItemProps) => {
 
     const [updating, setUpdating] = useState(false);
     const [dishItem, setDishItem] = useState<Dish>(dish)
     const [deleting, setDeleting] = useState<boolean>(false)
     const [posting, setPosting] = useState<boolean>(false)
 
+    // Local quantity to fix that annoying ass re-render
+    const [localQuantity, setLocalQuantity] = useState(dish.quantity)
+    useEffect(() => {
+      setLocalQuantity(dish.quantity);
+    }, [dish.quantity])
+
     // console.log('default dishItem', dishItem.quantity)
+
+    const quantityInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      if (quantityInputRef.current && document.activeElement === quantityInputRef.current) {
+        quantityInputRef.current.focus();
+      }
+    }, [dishItem.quantity])
 
     const handleUpdate = async () => {
       setUpdating(true)
@@ -444,13 +456,23 @@ const ProgressMenu = ({
         <div className=''>
           {/* Number */}
           <label>Quantity</label>
-          <input
+          {/* <input
             type='number'
             className='form-control'
             onChange={(e) => { 
               update_quantity(dishItem, Number(e.target.value))
              }}
-            defaultValue={dishItem?.quantity}
+            value={dishItem?.quantity}
+            onFocus={e => e.target.select()}
+          /> */}
+          <input
+            id={`quantity-input-${dishItem?.id}`}
+            type='number'
+            className='form-control'
+            onChange={e => setLocalQuantity(Number(e.target.value))}
+            onBlur={() => { update_quantity(dishItem, localQuantity) }}
+            onFocus={e => e.target.select()}
+            value={localQuantity}
           />
         </div>
         {/* <Link href={`/admin/menus/${menu.id}/dishes/${dish.id}`} className="btn btn-primary btn-sm">
@@ -458,7 +480,7 @@ const ProgressMenu = ({
         </Link> */}
       </div>
     )
-  }
+  })
 
   return (
     <>
@@ -521,7 +543,8 @@ const ProgressMenu = ({
                   <h4 className='mb-2'>Menu: {menu.name}</h4>
                   <p>{menu.description}</p>
                 </Card.Header>
-                <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}>
+                {/* <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}> */}
+                <Card.Body>
                   {/* List menu items: */}
                   <ul className="list-unstyled">
                     {menuItems?.map((dish: Dish) => (

@@ -77,7 +77,7 @@ const EventModalBody = ({
   const [progress_obj, set_progress_obj] = useState({
   venue: true,
   // tasting: false,
-  menu: false,
+  beo: false,
   quote: false,
   contract: false,
   invites: false,
@@ -143,7 +143,7 @@ const progress = {
       "date": null
     },
       {
-      "label": "Menu",
+      "label": "BEO",
       "status": null,
       "date": null
     },
@@ -256,7 +256,7 @@ const progress = {
                   <ProgressVenue event={event} onUpdate={updateEvent} />
                 )}
 
-                { progress_obj?.menu && (
+                { progress_obj?.beo && (
                   <ProgressMenu event={event} onUpdate={updateEvent} />
                 )}
                 { progress_obj?.quote && (
