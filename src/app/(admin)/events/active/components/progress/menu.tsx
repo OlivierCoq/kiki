@@ -181,7 +181,7 @@ const ProgressMenu = ({
   const update_quantity = async (dish: Dish, newQuantity: number) => {
 
     // if BEO status is confirmed, change to in_progress
-    if(event?.progress?.data[1]?.status === 'confirmed') {
+    if(event?.progress?.data[1]?.status === 'confirmed' || event?.progress?.data[1]?.status === null) {
       updateBEOStatus('in_progress')
     }
 

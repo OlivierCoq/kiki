@@ -39,7 +39,17 @@ const ProgressInvites = ({
 
   const updateInvitesStatus = async (e: any) => { 
     const newStatus = e.target.checked ? 'confirmed' : 'in_progress'
-    const progress_obj = event?.progress || { data: [] }
+    
+    const progress_obj = event?.progress
+    ? { ...event.progress, data: [...event.progress.data] }
+    : { data: [] }
+
+    // Copy the specific item before mutating
+    if (progress_obj.data[2]) {
+      progress_obj.data[2] = { ...progress_obj.data[2], status: newStatus, date: new Date().toISOString() }
+    }
+
+
     const invitesIndex = progress_obj.data.findIndex((item: any) => item.label === 'Invites')
     if (invitesIndex !== -1) {
       progress_obj.data[invitesIndex].status = newStatus

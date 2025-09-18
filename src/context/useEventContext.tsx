@@ -51,6 +51,7 @@ export const EventProvider = ({ children, event }: { children: React.ReactNode; 
     fetchEvent();
   }, [event?.id]);
 
+  
   const totalCost = useMemo(
     () => menuItems?.reduce(
         (sum: number, item: any) => sum + (item.quantity * item.cost),
