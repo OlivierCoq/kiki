@@ -22,7 +22,7 @@ const ChoicesFormInput = dynamic(
 )
 
 // Types
-import { Dish, Menu, Summary, Event } from '@/types/event'
+import { Event } from '@/types/event'
 
 interface InvitesProps {
   event: any;

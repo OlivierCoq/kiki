@@ -22,15 +22,15 @@ const ChoicesFormInput = dynamic(
 )
 
 // Types
-import { Dish, Menu, Summary, Event } from '@/types/event'
+import { Event } from '@/types/event'
 
 interface QuotesProps {
   event: any;
-  onUpdateEvent: (newEvent: Event) => void
+  onUpdate: (newEvent: Event) => void
 }
-const ProgressQuotes = ({
+const ProgressQuote = ({
   event,
-  onUpdateEvent
+  onUpdate
 }: QuotesProps) => {
 
 
@@ -49,16 +49,33 @@ const ProgressQuotes = ({
       progress_obj.data[3] = { ...progress_obj.data[3], status: newStatus, date: new Date().toISOString() }
     }
 
+    console.log('Progress Object:', progress_obj)
 
-    const quotesIndex = progress_obj.data.findIndex((item: any) => item.label === 'Quotes')
+
+    const quotesIndex = progress_obj.data.findIndex((item: any) => item.label === 'Quote')
     if (quotesIndex !== -1) {
       progress_obj.data[quotesIndex].status = newStatus
       progress_obj.data[quotesIndex].date = new Date().toISOString()
     } else {
-      progress_obj.data.push({ label: 'Quotes', status: newStatus, date: new Date().toISOString() })
+      progress_obj.data.push({ label: 'Quote', status: newStatus, date: new Date().toISOString() })
     }
     const updatedEvent = { ...event, progress: progress_obj }
-    onUpdateEvent(updatedEvent)
+    console.log('Updated Event:', updatedEvent)
+    fetch(`/api/events/update/${event.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedEvent),
+    }).then(response => response.json())
+      .then(data => {
+        console.log('Success:', data)
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })    
+    
+    onUpdate(updatedEvent)
   }
 
 
@@ -85,4 +102,4 @@ const ProgressQuotes = ({
   )
 }
 
-export default ProgressQuotes
+export default ProgressQuote

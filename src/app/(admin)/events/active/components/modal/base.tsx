@@ -260,7 +260,7 @@ const progress = {
                   <ProgressMenu event={event} onUpdate={updateEvent} />
                 )}
                 { progress_obj?.quote && (
-                  <ProgressQuote event={event} onUpdateEvent={updateEvent} />
+                  <ProgressQuote event={event} onUpdate={updateEvent} />
                 )}
                 { progress_obj?.contract && (
                   <ProgressContract event={event} />
