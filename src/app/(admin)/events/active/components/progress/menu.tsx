@@ -46,7 +46,7 @@ const ProgressMenu = ({
   onUpdate: (event: Event) => void
 }) => {
 
-  console.log('Edit Menu here...', event?.menu)
+  console.log('Editing BEO:', event?.menu)
 
   // Context
 

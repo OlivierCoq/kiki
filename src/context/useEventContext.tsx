@@ -45,7 +45,7 @@ export const EventProvider = ({ children, event }: { children: React.ReactNode; 
 
       const menuRes = await fetch(`/api/menus/${event?.menu}`);
       const menuData = await menuRes.json();
-      console.log('menuData', menuData?.menu?.id, menuData)
+      // console.log('menuData', menuData?.menu?.id, menuData)
       setMenuItems(menuData.menu?.dishes?.data ? menuData.menu?.dishes?.data : menuData.menu?.dishes ); // assuming { items: [...] }
     };
     fetchEvent();
@@ -60,7 +60,7 @@ export const EventProvider = ({ children, event }: { children: React.ReactNode; 
     [menuItems]
   )
 
-  console.log('totalCost', totalCost)
+  // console.log('totalCost', totalCost)
 
   const totalRevenue = useMemo(
     () => menuItems?.reduce(

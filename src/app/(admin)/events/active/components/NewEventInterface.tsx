@@ -15,18 +15,14 @@ import Link from 'next/link'
 import updateNestedValue from '@/helpers/NestedFields'
 
 // Types
-import { Event, Venue, ProgressEventStep, VenueImage, Summary, Dish } from '@/types/event'
+import { Event, Venue,  ProgressEventStep, VenueImage, Summary, Dish } from '@/types/event'
 
 
 // UI
    // Forms
 import { USStates } from '@/assets/data/us-states'
 import { worldCountries } from '@/assets/data/world-countries'
-import dynamic from 'next/dynamic'
-const ChoicesFormInput = dynamic(
-  () => import('@/components/form/ChoicesFormInput'),
-  { ssr: false }
-)
+import ChoicesFormInput from '@/components/form/ChoicesFormInput'
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 // Components
 
@@ -104,7 +100,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           "date": new Date().toISOString()
       },
       {
-          "label": "BEO",
+          "label": "Menu",
           "status": null,
           "date": null
       },
@@ -152,7 +148,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     "total_profit": 0
   }
 
-  const [ newEvent, setNewEvent ] = useState<Event>({
+  const [ newEvent, setNewEvent ] = useState<any>({
     active: true,
     created_at: '',
     customer: {
@@ -255,7 +251,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
 
     // Customer
   const updateCustomer = (customer: any) => {
-    setNewEvent((prev) => ({
+    setNewEvent((prev: any) => ({
       ...prev,
       date: prev.date,
       start_time: prev.start_time,
@@ -362,7 +358,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     }
   }
   const clear_customer = () => {
-    setNewEvent((prev) => ({
+    setNewEvent((prev: any) => ({
       ...prev,
       customer: {  
         created_at: '',
@@ -399,7 +395,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
 
     // Venue
   const clear_venue = () => {
-    setNewEvent((prev) => ({
+    setNewEvent((prev: any) => ({
       ...prev,
       venue: {
         id: 0,
@@ -470,7 +466,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     }).then((data) => {
       console.log('Image deleted successfully:', data)
       setStatus('Image deleted successfully.')
-      updateNestedValue('venue.images', (newEvent?.venue?.images ?? []).filter(img => img.name !== image.name), setNewEvent)
+      updateNestedValue('venue.images', (newEvent?.venue?.images ?? []).filter((img: VenueImage) => img.name !== image.name), setNewEvent)
     }).catch((error) => {
       console.error('Error deleting image:', error)
       setStatus('Error deleting image.')
@@ -1056,7 +1052,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
                     {status && <p className='text-success'>{status}</p>}
                     {(newEvent.venue?.images?.length ?? 0) > 0 && (
                       <div className="dz-preview">
-                        {(newEvent.venue?.images ?? []).map((image, idx) => (
+                        {(newEvent.venue?.images ?? []).map((image: VenueImage, idx: number) => (
                           <Card className="mt-1 mb-0 shadow-none border" key={idx + '-file'}>
                             <div className="p-2">
                               <Row className="align-items-center">

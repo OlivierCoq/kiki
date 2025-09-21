@@ -109,7 +109,8 @@ export async function POST(req: Request) {
             console.error('Error inserting customer into database:', error);
             return NextResponse.json({ error: 'Failed to add customer' }, { status: 500 });
           }
-          console.log('Customer added to database:', data);
+          // console.log('Customer added to database:', data);
+          console.log('Customer added to database successfully')
           response_obj = await data[0];
           return NextResponse.json({ message: 'Customer added successfully', customer: response_obj }, { status: 201 });
         
