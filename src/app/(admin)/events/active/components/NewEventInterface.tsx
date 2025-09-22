@@ -22,7 +22,11 @@ import { Event, Venue,  ProgressEventStep, VenueImage, Summary, Dish } from '@/t
    // Forms
 import { USStates } from '@/assets/data/us-states'
 import { worldCountries } from '@/assets/data/world-countries'
-import ChoicesFormInput from '@/components/form/ChoicesFormInput'
+import dynamic from 'next/dynamic'
+const ChoicesFormInput = dynamic(
+  () => import('@/components/form/ChoicesFormInput'),
+  { ssr: false }
+)
 import DropzoneFormInput from '@/components/form/DropzoneFormInput'
 // Components
 
@@ -32,6 +36,7 @@ import { useCustomers } from '@/context/useCustomersContext'
   // Venues
 import { useEvents } from '@/context/useEventsContext'
 import { error } from 'console'
+import { arch } from 'os'
 
 interface NewEventInterfaceProps {
   onNewEvent: (event: any) => {
@@ -92,6 +97,47 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     clear_venue()
   }
 
+// Menus
+  const [menus, setMenus] = useState<any[] | null>(null)
+
+  useEffect(() => {
+    if (!menus) {
+      try {
+        fetch('/api/menus').then(async (res) => {
+          const data = await res.json()
+          setMenus(data?.menus)
+          console.log('Menus fetched:', data)
+        })
+      } catch (error) {
+        console.error('Error fetching menus:', error)
+        setMenus([])
+      }
+      setLoading(false)
+    } else { setLoading(false) }
+  }, [])  
+  const clear_menu = () => {
+    setNewEvent((prev: any) => ({
+      ...prev,
+      menu: {
+        id: 1,
+        archived: false,
+        created_at: new Date().toISOString(),
+        description: '',
+        dishes: [] as Dish[],
+        is_public: true,
+        name: '',
+        packages: {
+          data: [] as number[]
+        },
+        price_per_person: 0,
+        tags: [] as string[]
+      }
+    }))
+  }
+ 
+  
+
+
   let progress = {
     data: [
       {
@@ -100,9 +146,9 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           "date": new Date().toISOString()
       },
       {
-          "label": "Menu",
-          "status": null,
-          "date": null
+          "label": "BEO",
+          "status": "in_progress",
+          "date": new Date().toISOString()
       },
       {
           "label": "Invites",
@@ -519,6 +565,66 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     
   }
 
+  // Menu
+ const [newMenu, setNewMenu] = useState(false)
+  const toggleNewMenu = () => {
+    setNewMenu(!newMenu)
+    clear_menu()
+  }
+
+  
+const [newMenuObj, setNewMenuObj] = useState({
+  name: `New event Menu` as string,
+  description: 'New event Menu description' as string,
+  items: [] as string[],
+  archived: false,
+  is_public: true,
+  price_per_person: 0,
+  dishes: [] as string[],
+  packages: [] as number[],
+  tags: [] as string[]
+})
+const addNewMenu = async () => {
+  if (!newMenuObj?.name || !newMenuObj?.description) {
+    console.error('Please fill in all required fields for new menu', newMenuObj)
+    return false
+  }
+  else {
+    console.log('Creating new menu in db...')
+    newEventStatus += ' Adding new menu...'
+    
+    try {
+      const res = await fetch('/api/menus/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newMenuObj)
+      })
+      const data = await res.json()
+      console.log('new menu created', data)
+      newEventObj.menu = data?.data[0]?.id
+      if (data?.data[0]) {
+        await menus?.push(data?.data[0])
+      }
+
+      newEventObj.menu = data?.data[0]?.id
+
+      return data?.data[0]
+    } catch (error) {
+      console.error('Error creating new menu:', error)
+      newEventStatus += ' Error creating new menu.'
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  } 
+}
+const cloneMenu = async (menu: any) => {
+
+}
+
+
    // Event
   let newEventStatus = ''
   let newEventError = ''
@@ -644,10 +750,10 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
     } else {
         toggleValidating()
         // console.log('sending to backend: ', newEventObj)
-        if(newCustomer || newVenue) {
+        if(newCustomer || newVenue || newMenu) {
           if(newCustomer) { await addNewCustomer() }
           if(newVenue) { await addNewVenue() }
-          
+          if(newMenu) { await addNewMenu() }
 
           newEventStatus = 'Creating new event...'
 
@@ -768,7 +874,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
           </Row>
 
           <Row>
-            <Col md={6}>
+            <Col md={4}>
               {/* Customer */}
 
               <Row className="px-2">
@@ -941,7 +1047,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
               }
 
             </Col>
-            <Col md={6}>
+            <Col md={4}>
               {/* Venue */}
 
               <Row className="px-2">
@@ -951,7 +1057,7 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
               {
                 newVenue &&
                 // <p>NEW VENUE</p>
-                <div className="mt-2 px-2 " style={{ height: '500px', overflowY: 'scroll' }}> 
+                <div className="mt-2 px-2 pe-3" style={{ height: '500px', overflowY: 'scroll' }}> 
                   <small className='mt-2 mb-4'>New venue details</small>
                   <Row className='mb-2 mt-1'>
                     <input type="text" className="form-control" value={newEvent.venue.name} onChange={(e) =>  updateNestedValue('venue.name', e.target.value, setNewEvent)} />
@@ -1106,6 +1212,57 @@ export const NewEventInterface = ({ onNewEvent }: NewEventInterfaceProps) => {
 
 
             </Col>
+            <Col md={4}>
+              {/* Menu */}
+
+              {/* Clone existing Event Menu */}
+              <Row className="px-2">
+                <FormCheck type="switch" label="Add new Menu" id="new_menu_switch" onChange={toggleNewMenu}/>
+              </Row>
+              
+              {
+                newMenu &&
+                <div className="mt-2 px-2 fade-in" style={{ height: '500px', overflowY: 'scroll' }}> 
+                  <small className='mt-2 mb-4'>New BEO basic details</small>
+                  <Row className='mb-2 me-2 mt-1'>
+                    <input type="text" className="form-control" value={newMenuObj.name} placeholder={`${newEvent?.name}' Menu`} onChange={(e) =>  setNewMenuObj({ ...newMenuObj, name: e.target.value })} />
+                    { validating && newMenu && !newMenuObj.name.length && <small className="text-danger mb-1">Please enter a menu name.</small> }
+                  </Row> 
+                  <Row className='mb-2 me-2 mt-1'>
+                    <textarea className='form-control' rows={3} 
+                      value={newMenuObj.description} onChange={(e) =>  setNewMenuObj({ ...newMenuObj, description: e.target.value })} placeholder='Description' /> 
+                  </Row> 
+                  <small className='mt-2'>Dishes and additional details can be added upon creation of event.</small>
+                </div>
+              }
+              {
+                !newMenu &&
+                <Row className="px-2 fade-in">
+                    <small className="my-2">Clone existing Event Menu</small>
+                  { menus && menus.length > 0 && (
+                    <ChoicesFormInput
+                      className="form-control"
+                      data-choices
+                      style={{zIndex: 98}}
+                      id="event-menu-choice"
+                      defaultValue={newEvent?.menu?.id || ""}
+                      onChange={(e) => { updateNestedValue('menu', menus.find((menu: any) => menu?.id === Number(e)), setNewEvent) }}
+                    >
+                      {menus?.map((menu: any, i: number) => (
+                        <option value={menu?.id} key={menu?.id}>
+                          {menu?.name} - {newEvent?.default_currency?.symbol}{menu?.price_per_person} per person
+                        </option>
+                      ))}
+                    </ChoicesFormInput>
+                  )}
+                </Row>
+              }
+
+              
+              { validating && !newEvent.menu && <small className="text-danger">Please select a menu.</small> }
+
+            </Col>
+                
           </Row>
 
           <Row>

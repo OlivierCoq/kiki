@@ -57,9 +57,9 @@ const CustomerPanel = ({
       fetch(`/api/customers/${event?.customer}`)
         .then(async (data) => {
           const res = await data.json()
-          // console.log('customer', res)
+          console.log('customer', res)
           setKikiCustomer(res?.customer)
-          setCustomer(res?.customer?.square_data)
+          setCustomer(res?.customer?.square_data?.customer)
           setLoadingCustomer(false)
           // console.log('holup', customer)
         })

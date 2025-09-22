@@ -305,7 +305,7 @@ const ProgressMenu = ({
           // }))
           let menuObj = menu 
 
-          menuObj.dishes.data =  menu?.dishes?.data?.map((dish: any) =>
+          menuObj.dishes.data =  menu?.dishes?.map((dish: any) =>
             dish?.id === update_response?.data?.id ?  update_response?.data : dish
           )
 
@@ -519,7 +519,7 @@ const ProgressMenu = ({
           {/* Loading animation */}
           <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
         </div>
-        }
+      }
 
         <Row className='m-3'>
           <Col md={6}></Col>
@@ -552,113 +552,198 @@ const ProgressMenu = ({
           </Col>
         </Row>
 
-        {
-          loadingMenu &&
-          <div className="text-center my-5">
-            {/* Loading animation */}
-            <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
-          </div>
-        }
+      {
+        loadingMenu &&
+        <div className="text-center my-5">
+          {/* Loading animation */}
+          <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />
+        </div>
+      }
 
-        {
-          menu && menuItems?.length && !newMenu && 
+      {
+        !loadingMenu && menu && menuItems.length > 0 && !newMenu &&
 
-          <Row className='m-3'>
-            <Col>
-              <Card className='shadow-sm'>
-                <Card.Header>
-                  <h4 className='mb-2'>Menu: {menu.name}</h4>
-                  <p>{menu.description}</p>
-                </Card.Header>
-                <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}>
-                  {/* List menu items: */}
-                  <ul className="list-unstyled">
-                    {menuItems?.map((dish: Dish) => (
-                      <DishItem key={dish?.id} dish={dish} onDishUpdate={updatedDish => {
-                          
-                          // Optionally, call your API here to update the summary in the DB
-                          update_quantity(updatedDish, updatedDish?.quantity) 
-                        }} />
+        <Row className='m-3'>
+          <Col>
+            <Card className='shadow-sm'>
+              <Card.Header>
+                <h4 className='mb-2'>Menu: {menu.name}</h4>
+                <p>{menu.description}</p>
+              </Card.Header>
+              <Card.Body className='overflow-y-scroll' style={{'height': '40vh'}}>
+                {/* List menu items: */}
 
-                    ))}
-                  </ul>
+                <ul className="list-unstyled">
+                  {menuItems?.map((dish: Dish) => (
+                    <DishItem key={dish?.id} dish={dish} onDishUpdate={updatedDish => {
+                        
+                        // Optionally, call your API here to update the summary in the DB
+                        update_quantity(updatedDish, updatedDish?.quantity) 
+                      }} />
 
-                  {
-                    addingDish &&
+                  ))}
+                </ul>
 
-                    <div className="d-flex flex-row w-75 w-sm-100">
-                      <IconifyIcon icon="mdi:food" className="me-2" />
-                      <div className="d-flex flex-column" style={{ width: '90%' }}>
-                        <input className='form-control fade-in mb-1' type='text' defaultValue={newDish?.name} placeholder='Dish Name'
-                          onChange={(e) => { updateNestedValue('name', e.target.value, setNewDish) }}
-                        />
-                        {
-                          !newDish.name && postingNewDish &&
+                {
+                  addingDish &&
 
-                          <small className='text-danger'>Please add a name</small>
-                        }
-                        <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newDish?.description} placeholder='Dish Description'
-                          onChange={(e) => { updateNestedValue('description', e.target.value, setNewDish) }}
-                        >
-                        </textarea>
-                        <div className="d-flex flex-row">
-                          <div className="d-flex flex-column me-2">
-                            <label htmlFor="">Cost</label>
-                            <div className="d-flex flex-row align-items-center">
-                              <small className='me-1'>{ event?.default_currency?.symbol }</small>
-                              <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.cost} placeholder='0' 
-                              onChange={(e) => { updateNestedValue('cost', e.target.value, setNewDish) }}
-                            />
-                            </div>
+                  <div className="d-flex flex-row w-75 w-sm-100">
+                    <IconifyIcon icon="mdi:food" className="me-2" />
+                    <div className="d-flex flex-column" style={{ width: '90%' }}>
+                      <input className='form-control fade-in mb-1' type='text' defaultValue={newDish?.name} placeholder='Dish Name'
+                        onChange={(e) => { updateNestedValue('name', e.target.value, setNewDish) }}
+                      />
+                      {
+                        !newDish.name && postingNewDish &&
+
+                        <small className='text-danger'>Please add a name</small>
+                      }
+                      <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newDish?.description} placeholder='Dish Description'
+                        onChange={(e) => { updateNestedValue('description', e.target.value, setNewDish) }}
+                      >
+                      </textarea>
+                      <div className="d-flex flex-row">
+                        <div className="d-flex flex-column me-2">
+                          <label htmlFor="">Cost</label>
+                          <div className="d-flex flex-row align-items-center">
+                            <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                            <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.cost} placeholder='0' 
+                            onChange={(e) => { updateNestedValue('cost', e.target.value, setNewDish) }}
+                          />
                           </div>
-                          <div className="d-flex flex-column">
-                            <label htmlFor="">Price</label>
-                            <div className="d-flex flex-row align-items-center">
-                              <small className='me-1'>{ event?.default_currency?.symbol }</small>
-                              <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.price} placeholder='0'
-                                onChange={(e) => { updateNestedValue('price', e.target.value, setNewDish) }}
-                              />
-                            </div>
+                        </div>
+                        <div className="d-flex flex-column">
+                          <label htmlFor="">Price</label>
+                          <div className="d-flex flex-row align-items-center">
+                            <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                            <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.price} placeholder='0'
+                              onChange={(e) => { updateNestedValue('price', e.target.value, setNewDish) }}
+                            />
                           </div>
                         </div>
                       </div>
-                      <div className="d-flex flex-column justify-contents-center align-items-center">
-                        <button className='btn btn-xs p-0 bg-transparent btn-outline-transparent btn-outline-none' disabled={postingNewDish} onClick={() => setPostingNewDish(false)}>
-                          <IconifyIcon icon="bx:plus" className="m-2 cursor-pointer" fontSize={15}    />
-                        </button>
-                        <IconifyIcon 
-                          icon={ postingNewDish ? "mdi:loading" : "bx:check"}
-                          className={(!newDish.name && postingNewDish) ? "mb-4 text-neutral" : "mb-4 text-success cursor-pointer"}
-                          fontSize={20} 
-                          onClick={() => confirmAddDish()}   />
-                          {/* <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />  */}
-                        <IconifyIcon icon="bx:x" className='text-danger cursor-pointer' fontSize={20} onClick={() => setAddingDish(false)}   />
+                    </div>
+                    <div className="d-flex flex-column justify-contents-center align-items-center">
+                      <button className='btn btn-xs p-0 bg-transparent btn-outline-transparent btn-outline-none' disabled={postingNewDish} onClick={() => setPostingNewDish(false)}>
+                        <IconifyIcon icon="bx:plus" className="m-2 cursor-pointer" fontSize={15}    />
+                      </button>
+                      <IconifyIcon 
+                        icon={ postingNewDish ? "mdi:loading" : "bx:check"}
+                        className={(!newDish.name && postingNewDish) ? "mb-4 text-neutral" : "mb-4 text-success cursor-pointer"}
+                        fontSize={20} 
+                        onClick={() => confirmAddDish()}   />
+                        {/* <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />  */}
+                      <IconifyIcon icon="bx:x" className='text-danger cursor-pointer' fontSize={20} onClick={() => setAddingDish(false)}   />
+                    </div>
+                  </div>
+                }
+
+                <div className="d-flex flex-column justify-content-end align-items-end w-25 ms-auto">
+                  <button 
+                    className="btn btn-primary mb-2"
+                    onClick={() => { setAddingDish(true)}}
+                  >
+                    Add dish
+                  </button>
+                  <button 
+                    className="btn btn-success"
+                    onClick={() => { updateBEOStatus('confirmed') }}
+                    disabled={postingBeoStatus || event?.progress?.data[1]?.status === 'confirmed'}
+                  >
+                    Complete BEO
+                  </button>
+                </div>
+                
+
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      }
+
+      {
+        !loadingMenu && menu && !menuItems.length && !newMenu &&
+
+        <Row>
+          {
+            addingDish ? 
+
+            <Col md={8} className="mx-auto">
+              <Card className='shadow-sm'>
+                <Card.Header>
+                  <h4 className='mb-2'>Add New Dish</h4>
+                  <p>This menu has no dishes yet. Start by adding a dish.</p>
+                  <div className="d-flex flex-row w-75 w-sm-100">
+                    <IconifyIcon icon="mdi:food" className="me-2" />
+                    <div className="d-flex flex-column" style={{ width: '90%' }}>
+                      <input className='form-control fade-in mb-1' type='text' defaultValue={newDish?.name} placeholder='Dish Name'
+                        onChange={(e) => { updateNestedValue('name', e.target.value, setNewDish) }}
+                      />
+                      {
+                        !newDish.name && postingNewDish &&
+
+                        <small className='text-danger'>Please add a name</small>
+                      }
+                      <textarea className='form-control fade-in mb-1' rows={3} defaultValue={newDish?.description} placeholder='Dish Description'
+                        onChange={(e) => { updateNestedValue('description', e.target.value, setNewDish) }}
+                      >
+                      </textarea>
+                      <div className="d-flex flex-row">
+                        <div className="d-flex flex-column me-2">
+                          <label htmlFor="">Cost</label>
+                          <div className="d-flex flex-row align-items-center">
+                            <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                            <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.cost} placeholder='0' 
+                            onChange={(e) => { updateNestedValue('cost', e.target.value, setNewDish) }}
+                          />
+                          </div>
+                        </div>
+                        <div className="d-flex flex-column">
+                          <label htmlFor="">Price</label>
+                          <div className="d-flex flex-row align-items-center">
+                            <small className='me-1'>{ event?.default_currency?.symbol }</small>
+                            <input className='form-control fade-in mb-1' type='number' defaultValue={newDish?.price} placeholder='0'
+                              onChange={(e) => { updateNestedValue('price', e.target.value, setNewDish) }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  }
-
-                  <div className="d-flex flex-column justify-content-end align-items-end w-25 ms-auto">
-                    <button 
-                      className="btn btn-primary mb-2"
-                      onClick={() => { setAddingDish(true)}}
-                    >
-                      Add dish
-                    </button>
-                    <button 
-                      className="btn btn-success"
-                      onClick={() => { updateBEOStatus('confirmed') }}
-                      disabled={postingBeoStatus || event?.progress?.data[1]?.status === 'confirmed'}
-                    >
-                      Complete BEO
-                    </button>
+                    <div className="d-flex flex-column justify-contents-center align-items-center">
+                      <button className='btn btn-xs p-0 bg-transparent btn-outline-transparent btn-outline-none' disabled={postingNewDish} onClick={() => setPostingNewDish(false)}>
+                        <IconifyIcon icon="bx:plus" className="m-2 cursor-pointer" fontSize={15}    />
+                      </button>
+                      <IconifyIcon 
+                        icon={ postingNewDish ? "mdi:loading" : "bx:check"}
+                        className={(!newDish.name && postingNewDish) ? "mb-4 text-neutral" : "mb-4 text-success cursor-pointer"}
+                        fontSize={20} 
+                        onClick={() => confirmAddDish()}   />
+                        {/* <IconifyIcon icon="mdi:loading" className="spinner-border text-primary" />  */}
+                      <IconifyIcon icon="bx:x" className='text-danger cursor-pointer' fontSize={20} onClick={() => setAddingDish(false)}   />
+                    </div>
                   </div>
-                  
-
-                </Card.Body>
+                </Card.Header>
               </Card>
             </Col>
-          </Row>
-        }
+
+            :
+
+            <Col md={12}>
+              <div className="text-center my-5">
+                <p>No dishes in this menu yet.</p>
+                <button
+              className="btn btn-primary mb-2"
+              onClick={() => { setAddingDish(true) }}
+              >
+                Add dish
+              </button>
+              </div>
+            </Col>
+          }
+        </Row>
+          
+      }
+
 
 
     </>
