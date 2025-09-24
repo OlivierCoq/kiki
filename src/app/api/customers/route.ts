@@ -1,8 +1,10 @@
 'use server'
 // NextJS
 import { NextResponse, NextRequest } from 'next/server'
+import { cache } from 'react'
 // Supabase
 import { createClient } from '@supabase/supabase-js'
+
 const supabase = createClient(process?.env?.NEXT_PUBLIC_SUPABASE_URL!, process?.env?.SUPABASE_SERVICE_ROLE_SECRET!)
 // Square
 import { randomUUID } from 'crypto'
@@ -13,10 +15,15 @@ const squareClient = new SquareClient({
   token: process.env.NEXT_PUBLIC_SQUARE_ACCESS_TOKEN,
 })
 
-export async function GET(request: NextRequest) {
+const fetchCustomers = cache(async () => {
+  const { data, error } = await supabase.from('customers').select('*').order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+})()
+
+export async function GET() {
   try {
-    const { data, error } = await supabase.from('customers').select('*')
-    if (error) throw error
+    const data = await fetchCustomers
     return NextResponse.json(data)
   } catch (error) {
     console.error('Error fetching customers:', error)

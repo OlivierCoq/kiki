@@ -164,13 +164,17 @@ const ProgressMenu = ({
 
     let menuObj = menu
     console.group('saveQuantity', dish, quantity)
+    console.log('menu items', menuItems)
     menuObj.dishes = menuItems
 
     try {
       await fetch(`/api/menus/update/${dish?.menu}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(menuObj),
+        body: JSON.stringify({
+          id: dish?.menu,
+          dishes: menuObj.dishes
+        }),
       });
     } catch (err) {
       console.error('Failed to save quantity:', err);
