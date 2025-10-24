@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Warehouse' }
 const WarehousePage = () => {
   return (
     <>
-      <PageTItle title="KIKI" />
+      <PageTItle title="WAREHOUSE LIST" />
       <StockData />
       <WarehouseList />
     </>

@@ -12,7 +12,7 @@ const WarehouseList = async () => {
         <Card>
           <div className="d-flex card-header justify-content-between align-items-center">
             <div>
-              <CardTitle as={'h4'}>KIKI</CardTitle>
+              <CardTitle as={'h4'}>All Warehouse List</CardTitle>
             </div>
             <Dropdown>
               <DropdownToggle

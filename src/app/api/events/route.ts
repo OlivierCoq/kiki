@@ -16,7 +16,8 @@ export async function GET() {
     try {
       const { data, error } = await supabase
         .from('events')
-        .select('*')
+        // select venue, menu, customer, start_time, end_time
+        .select('venue, menu, customer, start_time, end_time, notes, name, active, date, progress, archived, id, default_currency, total_revenue, total_cost, total_profit')
         .eq('archived', false)
         .order('created_at', { ascending: false })
 
